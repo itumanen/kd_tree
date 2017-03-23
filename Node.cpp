@@ -1,11 +1,16 @@
 #include "Node.h"
 
-// default constructor
-Node::Node() {
+// default constructor TODO not necessary?
+// Node::Node() {
 
+// }
+
+Node::Node(point2D* point) {
+	setPoint(point);
+	setType(LEAF); // default; this gets set when kd-tree is built
 }
 
-Node::Node(point2D* points) {
-	// set num_points
-	
+Node::~Node() {
+	delete(left);
+	delete(right);
 }

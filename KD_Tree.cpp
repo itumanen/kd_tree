@@ -44,16 +44,27 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 
 		// build tree recursively
 		// left and right arrays
-		point2D x_left[median], x_right[median], y_left[median], y_right[median]; // TODO malloc instead?
+		// point2D* x_right, y_left, y_right;
+		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_right = (point2D*)malloc(median * sizeof(point2D*));
+
 		for (int i = 0; i < median; i++) {
 			x_left[i] = sorted_by_x[i];
 			x_right[i] = sorted_by_x[median + i];
 		}
 
-		// TODO qsort x_left and x_right by y-coordinate
+		// TODO qsort x_left and x_right by y-coordinate and initialize y_ARRAYS
 
 		root->setLeft(build_kd_tree(x_left, y_left, median, getHeight() ));
 		root->setRight(build_kd_tree(x_right, y_right, median, getHeight() ));
+
+		free(x_left);
+		free(x_right);
+		free(y_left);
+		free(y_right);
+
 	}
 
 }
@@ -66,26 +77,57 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 
 	// if only one point, return leaf containing point
 	if (depth % 2 == 0 && num > 1) {
+
+		// add node to the tree
 		Node* node = new Node(&points_by_x[median]);
 		node->setType(VERTICAL);
 		node->setNumPoints(median);
 		node->setDepth(depth);
-		// todo split array into P1 and P2
-		point2D sorted_x[median], sorted_y[median];
+
+		// split arrays and allocate memory
+		// TODO SORT
+		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_right = (point2D*)malloc(median * sizeof(point2D*));
+
 		// recursive call
-		node->setLeft(build_kd_tree(sorted_x, sorted_y, median, depth + 1));
-		node->setRight(build_kd_tree(sorted_x, sorted_y, median, depth + 1));
+		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
+		node->setRight(build_kd_tree(x_right, x_right, median, depth + 1));
+
+		// free arrays before returning
+		free(x_left);
+		free(x_right);
+		free(y_left);
+		free(y_right);
+
 		return node;
+
 	} else if (depth % 2 != 0 && num > 1) {
+
+		// add node to the tree
 		Node* node = new Node(&points_by_y[median]);
 		node->setType(HORIZONTAL);
 		node->setNumPoints(median);
 		node->setDepth(depth);
-		// todo split array
-		point2D sorted_x[median], sorted_y[median];
+
+		// split arrays and allocate memory
+		// TODO SORT
+		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
+		point2D* y_right = (point2D*)malloc(median * sizeof(point2D*));
+
 		// recursive call
-		node->setLeft(build_kd_tree(sorted_x, sorted_y, median, depth + 1));
-		node->setRight(build_kd_tree(sorted_x, sorted_y, median, depth + 1));
+		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
+		node->setRight(build_kd_tree(x_right, x_right, median, depth + 1));
+
+		// free arrays before returning
+		free(x_left);
+		free(x_right);
+		free(y_left);
+		free(y_right);
+
 		return node;
 	}
 

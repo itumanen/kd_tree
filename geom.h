@@ -1,11 +1,17 @@
 #ifndef __geom_h
 #define __geom_h
 
+#include <math.h>
+
+#define EPSILON 0.00000001
+#define DEBUG true
+
 // todo look up how to implement this as char?
 enum cutType {
-	HORIZONTAL = 100,
-	VERTICAL,
-	LEAF
+	VERTICAL = 100,
+	HORIZONTAL,
+	LEAF,
+	INITIAL_CUT = VERTICAL
 };
 
 typedef struct _point2d {
@@ -22,6 +28,8 @@ typedef struct _segment2d {
 
 void printPoint(point2D p);
 void printSegment(segment2D s);
+
+bool equals(point2D a, point2D b);
 
 
 #endif

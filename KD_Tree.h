@@ -11,10 +11,11 @@ class KD_Tree {
 	KD_Tree(point2D* pts, int numPoints);
 	~KD_Tree();
 
-	// INITIALIZATION AND HELPER FUNCTIONS
-	Node* build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num, int cutType);
-	void add_node(Node* node);
-	void delete_node(Node* node);
+	// HELPER FUNCTIONS
+	Node* build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num, int depth);
+	void initializeHeight() { this->height = 1; }
+	int computeHeight();
+	void deallocate_tree(Node* node);
 
 	// SORTING METHODS
 	point2D* sortByX(point2D pts);
@@ -24,6 +25,7 @@ class KD_Tree {
 	int orderByY(point2D a, point2D b);
 
 	// PRINT FUNCTIONS
+	void printInfo();
 	void printNumNodes();
 
 	// INLINE GETTERS AND SETTERS
@@ -33,14 +35,15 @@ class KD_Tree {
 
 	void setRoot(Node* r) { this->root = r; }
 	void setHeight(int h) { this->height = h; }
-	void updateNumNodes(int num) { this->num_nodes = num; }
+	void incrementHeight() { this->height++; }
+	void setNumNodes(int num) { this->num_nodes = num; }
+	void incrementNumNodes() { this->num_nodes++; }
 
 
 private:
 	Node* root;
 	int height;
 	int num_nodes;
-
 	point2D* sorted_by_x;
 	point2D* sorted_by_y;
 

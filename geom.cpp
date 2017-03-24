@@ -13,3 +13,7 @@ void printSegment(segment2D s) {
 	printf("start (%lf, %lf)  end (%lf, %lf)\n", s.start.x, s.start.y, s.end.x, s.end.y);
 	fflush(stdout);
 }
+
+bool equals(point2D a, point2D b) {
+	return( fabs(a.x - b.x) < EPSILON && fabs(a.y - b.y) < EPSILON );
+}

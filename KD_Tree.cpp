@@ -14,11 +14,14 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 	initializeHeight();
 
 	if (numPoints == 1) {
+
 		Node* root = new Node(pts);
 		root->setNumPoints(numPoints);
 		root->setDepth(getHeight());
 		setRoot(root); // note: Node type set to LEAF by default
+
 	} else {
+
 		// Initialize root node
 		int median = numPoints / 2; // TODO VERIFY, should round up tho
 		Node* root = new Node(&sorted_by_x[median]); 
@@ -44,7 +47,6 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 
 		// build tree recursively
 		// left and right arrays
-		// point2D* x_right, y_left, y_right;
 		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
@@ -53,7 +55,8 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 		for (int i = 0; i < median; i++) {
 			x_left[i] = sorted_by_x[i];
 			x_right[i] = sorted_by_x[median + i];
-		}
+		} // 0 1 2 3 4, median 3
+		  // 0 1 2 3, median 2
 
 		// TODO qsort x_left and x_right by y-coordinate and initialize y_ARRAYS
 
@@ -65,6 +68,8 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 		free(y_left);
 		free(y_right);
 
+		computeHeight();
+
 	}
 
 }
@@ -74,6 +79,7 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 
 	assert(num > 0); // TODO IF THIS FAILS DEBUG!! --> print statement
 	int median = num / 2;
+	setHeight(depth);
 
 	// if only one point, return leaf containing point
 	if (depth % 2 == 0 && num > 1) {
@@ -85,11 +91,20 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		node->setDepth(depth);
 
 		// split arrays and allocate memory
-		// TODO SORT
 		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* y_right = (point2D*)malloc(median * sizeof(point2D*));
+
+		// copy data from sorted x array
+		for (int i = 0; i < median; i++) {
+			x_left[i] = points_by_x[i];
+			x_right[i] = points_by_x[median + i];
+			y_left[i] = points_by_x[i];
+			y_right[i] = points_by_x[median + i];
+		}
+
+		// TODO SORT y arrays BY Y COORDINATE
 
 		// recursive call
 		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
@@ -112,11 +127,20 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		node->setDepth(depth);
 
 		// split arrays and allocate memory
-		// TODO SORT
 		point2D* x_left = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* x_right = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* y_left = (point2D*)malloc(median * sizeof(point2D*));
 		point2D* y_right = (point2D*)malloc(median * sizeof(point2D*));
+
+		// copy data from sorted x array
+		for (int i = 0; i < median; i++) {
+			y_left[i] = points_by_y[i];
+			y_right[i] = points_by_y[median + i];
+			x_left[i] = points_by_y[i];
+			x_right[i] = points_by_y[median + i];
+		}
+
+		// TODO SORT BY X-COORDINATE
 
 		// recursive call
 		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
@@ -141,10 +165,12 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 	node->setNumPoints(num);
 	node->setDepth(depth);
 	return node;
+
 }
 
 // traverses tree from root to leftmost leaf and returns height of tree
 int KD_Tree::computeHeight() {
+
 	Node* temp = root;
 	int height = 0;
 	while (temp->isLeaf()) {
@@ -152,14 +178,15 @@ int KD_Tree::computeHeight() {
 		temp = temp->getLeft();
 	}
 	return height;
+
 }
 
 // SORTING METHODS - TODO move all qsort things here
-point2D* KD_Tree::sortByX(point2D pts) {
+point2D* KD_Tree::sortByX(point2D* pts) {
 	return sorted_by_x;
 }
 
-point2D* KD_Tree::sortByY(point2D pts) {
+point2D* KD_Tree::sortByY(point2D* pts) {
 	return sorted_by_y;
 }
 
@@ -196,12 +223,15 @@ void KD_Tree::printNumNodes() {
 
 // recurse through entire tree and call destructors of all nodes
 void KD_Tree::deallocate_tree(Node* node) {
+
 	if (node->isLeaf()) {
 		return;
 	}
+	
 	deallocate_tree(node->getLeft());
 	deallocate_tree(node->getRight());
 	node->~Node();
+
 }
 
 // DESTRUCTOR

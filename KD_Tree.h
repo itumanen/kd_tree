@@ -18,8 +18,8 @@ class KD_Tree {
 	void deallocate_tree(Node* node);
 
 	// SORTING METHODS
-	point2D* sortByX(point2D pts);
-	point2D* sortByY(point2D pts);
+	point2D* sortByX(point2D* pts);
+	point2D* sortByY(point2D* pts);
 	// comparison functions
 	int orderByX(point2D a, point2D b);
 	int orderByY(point2D a, point2D b);

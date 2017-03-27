@@ -4,62 +4,87 @@
 
 #include "KD_Tree.h"
 
+// DEFAULT CONSTRUCTOR
+KD_Tree::KD_Tree() {
+	setRoot(NULL); 
+	setHeight(0); 
+	setNumNodes(0); 
+	setPts(NULL);
+}
+
 // CONSTRUCTOR 
-KD_Tree::KD_Tree(point2D* pts, int numPoints) {
+KD_Tree::KD_Tree(point2D* points, int numPoints) {
 
 	// check that input is valid and numPoints is strictly positive
-	assert(pts);
+	assert(points);
 	assert(numPoints > 0);
 
+	setPts(points); // save points array in tree
 	setNumNodes(numPoints); 
 	initializeHeight();
 
 	if (numPoints == 1) {
 
-		Node* root = new Node(pts);
+		Node* root = new Node(pts[0]);
 		root->setNumPoints(numPoints);
 		root->setDepth(getHeight());
 		setRoot(root); // note: Node type set to LEAF by default
+
+	} else if (numPoints == 2) {
+
+		Node* root = new Node(pts[1]);
+		root->setNumPoints(numPoints);
+		root->setDepth(getHeight());
+		root->setType(INITIAL_CUT);
+		setRoot(root);
+
+		Node* left = new Node(pts[0]); // type set to LEAF by default
+		left->setNumPoints(numPoints - 1);
+		left->setDepth(getHeight() + 1);
+		root->setLeft(left);
+
+		computeHeight();
+
 
 	} else {
 
 		// Initialize root node
 		int median = numPoints / 2; // integer division rounds DOWN
-		Node* root = new Node(&sorted_by_x[median]); 
+		// if the number of points is odd, the left array needs to be one
+		// index larger than the right
+		// Example:
+		// 0 1 2 3 4, median index 2 --> left [0,1] right [3,4]
+		// 0 1 2 3, median 2 --> left [0,1] right [3]
+		int odd = 0;
+		if (ptsIsOdd()) {
+			odd = 1;
+		}
+
+		Node* root = new Node(points[median]); 
 		root->setType(INITIAL_CUT);
 		root->setNumPoints(numPoints);
 		root->setDepth(getHeight());
 		setRoot(root);
 
 		// allocate memory for sorted arrays and initialize by copying data from pts
-		sorted_by_x = (point2D*)malloc(numPoints * sizeof(point2D));
-		// sorted_by_y = (point2D*)malloc(numPoints * sizeof(point2D)); // TODO might not need this
-
-		assert(sorted_by_x);
-		// assert(sorted_by_y); // TODO might not need this
-
-		for(int i = 0; i < numPoints; i++) {
-			sorted_by_x[i] = pts[i];
-			// sorted_by_y[i] = pts[i];
-		}
-
-		// TODO QSORT - includes and implementation
-
-		// build tree recursively
-		// left and right arrays
 		point2D* x_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* x_right = (point2D*)malloc(median * sizeof(point2D));
+		point2D* x_right = (point2D*)malloc((median - odd) * sizeof(point2D));
 		point2D* y_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_right = (point2D*)malloc(median * sizeof(point2D));
+		point2D* y_right = (point2D*)malloc((median - odd) * sizeof(point2D));
 
 		for (int i = 0; i < median; i++) {
-			x_left[i] = sorted_by_x[i];
-			x_right[i] = sorted_by_x[median + i];
-		} // 0 1 2 3 4, median 2
-		  // 0 1 2 3, median 2
+			x_left[i] = pts[i];
+			y_left[i] = pts[i];
+		} 
+
+		for (int i = median + 1; i < numPoints; i++) {
+			x_right[i] = pts[i];
+			y_right[i] = pts[i];
+		}
 
 		// TODO qsort x_left and x_right by y-coordinate and initialize y_ARRAYS
 
+		// BUILD TREE RECURSIVELY
 		root->setLeft(build_kd_tree(x_left, y_left, median, getHeight() ));
 		root->setRight(build_kd_tree(x_right, y_right, median, getHeight() ));
 
@@ -85,7 +110,7 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 	if (depth % 2 == 0 && num > 1) {
 
 		// add node to the tree
-		Node* node = new Node(&points_by_x[median]);
+		Node* node = new Node(points_by_x[median]);
 		node->setType(VERTICAL);
 		node->setNumPoints(median);
 		node->setDepth(depth);
@@ -121,7 +146,7 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 	} else if (depth % 2 != 0 && num > 1) {
 
 		// add node to the tree
-		Node* node = new Node(&points_by_y[median]);
+		Node* node = new Node(points_by_y[median]);
 		node->setType(HORIZONTAL);
 		node->setNumPoints(median);
 		node->setDepth(depth);
@@ -155,13 +180,13 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		return node;
 	}
 
-	// if num is 1, return a leaf
+	// BASE CASE: IF NUMBER OF POINTS IS 1, RETURN A LEAF
 	if (DEBUG) {
 		printf("num should be 1 and is %d\n", num);
 	}
 
 	assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
-	Node* node = new Node(points_by_x); // default type is LEAF
+	Node* node = new Node(points_by_x[0]); // default type is LEAF
 	node->setNumPoints(num);
 	node->setDepth(depth);
 	return node;
@@ -169,15 +194,15 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 }
 
 // traverses tree from root to leftmost leaf and returns height of tree
-// if n is odd, then the "right side" array is larger than the left – thus,
-// the longest path from root to leaf is on the rightmost side? TODO REVISIT THIS
+// if n is odd, then the "left side" array is larger than the right – thus,
+// the longest path from root to leaf is the leftmost one
 int KD_Tree::computeHeight() {
 
 	Node* temp = root;
 	int height = 0;
 	while (temp->isLeaf()) {
 		height++; 
-		temp = temp->getRight();
+		temp = temp->getLeft();
 	}
 	return height;
 
@@ -252,7 +277,7 @@ KD_Tree::~KD_Tree() {
 	deallocate_tree(getRoot());
 	delete(getRoot());
 
-	// deallocate arrays
-	free(sorted_by_x);
-	// free(sorted_by_y);
+	// deallocate array TODO DOUBLE CHECK -- DONE IN MAIN?
+	// free(pts);
+
 }

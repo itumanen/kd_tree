@@ -1,11 +1,20 @@
 #include "Node.h"
 
-// default constructor TODO not necessary?
-// Node::Node() {
+// default constructor
+Node::Node() {
+	// set to empty point
+	point2D null_point; 
+	null_point.x = 0.0;
+	null_point.y = 0.0;
+	setPoint(null_point); 
+	setType(LEAF); 
+	setNumPoints(0); 
+	setDepth(0); 
+	setLeft(NULL);
+	setRight(NULL);
+}
 
-// }
-
-Node::Node(point2D* point) {
+Node::Node(point2D point) {
 	setPoint(point);
 	setNumPoints(0); // todo this is default for now
 
@@ -18,7 +27,7 @@ Node::Node(point2D* point) {
 
 // PRINT FUNCTIONS
 void Node::printInfo() {
-	printPoint(*getPoint());
+	printPoint(getPoint());
 	printType();
 	printNumPoints();
 	fflush(stdout);

@@ -7,8 +7,8 @@
 class KD_Tree {
 
 	// CONSTRUCTORS AND DESTRUCTOR
-	// KD_Tree(); // TODO necessary?
-	KD_Tree(point2D* pts, int numPoints);
+	KD_Tree();
+	KD_Tree(point2D* points, int numPoints);
 	~KD_Tree();
 
 	// HELPER FUNCTIONS
@@ -16,10 +16,11 @@ class KD_Tree {
 	void initializeHeight() { this->height = 1; }
 	int computeHeight();
 	void deallocate_tree(Node* node);
+	bool ptsIsOdd() { return (num_nodes % 2 == 0); }
 
 	// SORTING METHODS
-	point2D* sortByX(point2D* pts);
-	point2D* sortByY(point2D* pts);
+	point2D* sortByX(point2D* points);
+	point2D* sortByY(point2D* points);
 	// comparison functions
 	int orderByX(point2D a, point2D b);
 	int orderByY(point2D a, point2D b);
@@ -38,13 +39,12 @@ class KD_Tree {
 	void incrementHeight() { this->height++; }
 	void setNumNodes(int num) { this->num_nodes = num; }
 	void incrementNumNodes() { this->num_nodes++; }
-
+	void setPts(point2D* points) { this->pts = points; }
 
 private:
 	Node* root;
 	int height;
 	int num_nodes;
-	point2D* sorted_by_x; // stores original sorted array, todo need this?
-	// point2D* sorted_by_y;
+	point2D* pts;
 
 };

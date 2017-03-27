@@ -6,7 +6,10 @@
 #define EPSILON 0.00000001
 #define DEBUG true
 
-// todo look up how to implement this as char?
+// Used by Node and KD_Tree classes - helps distinguish
+// nodes that are leaves in the tree as well as nodes that
+// represent vertical/horizontal cuts in the plane
+// The first cut is vertical by default, but can be changed.
 enum cutType {
 	VERTICAL = 100,
 	HORIZONTAL,

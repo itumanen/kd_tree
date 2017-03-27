@@ -7,6 +7,7 @@
 
 Node::Node(point2D* point) {
 	setPoint(point);
+	setNumPoints(0); // todo this is default for now
 
 	// default; these get set when kd-tree is built
 	setType(LEAF); 

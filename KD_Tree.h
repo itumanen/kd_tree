@@ -44,7 +44,7 @@ private:
 	Node* root;
 	int height;
 	int num_nodes;
-	point2D* sorted_by_x;
-	point2D* sorted_by_y;
+	point2D* sorted_by_x; // stores original sorted array, todo need this?
+	// point2D* sorted_by_y;
 
 };

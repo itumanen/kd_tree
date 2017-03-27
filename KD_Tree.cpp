@@ -40,7 +40,7 @@ KD_Tree::KD_Tree(point2D* pts, int numPoints) {
 
 		for(int i = 0; i < numPoints; i++) {
 			sorted_by_x[i] = pts[i];
-			sorted_by_y[i] = pts[i];
+			// sorted_by_y[i] = pts[i];
 		}
 
 		// TODO QSORT - includes and implementation
@@ -185,29 +185,38 @@ int KD_Tree::computeHeight() {
 
 // SORTING METHODS - TODO move all qsort things here -- need to?
 point2D* KD_Tree::sortByX(point2D* pts) {
-	return sorted_by_x;
+	return pts;
 }
 
 point2D* KD_Tree::sortByY(point2D* pts) {
-	return sorted_by_y;
+	return pts;
 }
 
 // comparison functions for system qsort
 int KD_Tree::orderByX(point2D a, point2D b) {
-	if (a.x < b.x) return -1;
-	if (a.x > b.x) return 1;
-	if (fabs(a.x - b.x) < EPSILON) return (orderByY(a, b)); // if a and b have the same x-coord, order by y
+	if (fabs(a.x - b.x) < EPSILON) {
+		return (orderByY(a, b)); // if a and b have the same x-coord, order by y
+	}
+	if (a.x < b.x) {
+		return -1;
+	}
+	// (a.x > b.x) 	
+	return 1;
+	
 }
 
 int KD_Tree::orderByY(point2D a, point2D b) {
-	if (a.y < b.y) return -1;
-	if (a.y > b.y) return 1;
 	if (fabs(a.y - b.y) < EPSILON) {  // a and b have same y-coordinate
 		if( fabs(a.x - b.x) < EPSILON) { // a and b also have same x-coordinate (not likely)
 			return 0;
 		}
 		return (orderByX(a, b)); // same y-coord but different x-coord, sort by x
 	}
+	if (a.y < b.y) {
+		return -1; 
+	}
+	// a.y > b.y)
+		return 1;
 }
 
 // PRINT FUNCTIONS

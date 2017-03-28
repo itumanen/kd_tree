@@ -11,7 +11,10 @@ PART I: BUILD KD TREE
 - TODO: 
 	* add rtimer code to makefile + use to compute the run time of KD tree construction
 	* To use less space, declare enum using chars instead of ints
-	* handle odd-numbered inputs (number of points)
+	* Error messages for assert? 
+	* MAIN FILE!!! look at previous projects
+	* test code on small inputs + compare results by hand
+	* PRINT TREE METHOD
 - Known Bugs:
 	* setting height during recursive calls could yield incorrect results - thus this isn't done on the fly, but before exiting the constructor
 	* if number of points is odd, the right-side array needs to be allocated one space more

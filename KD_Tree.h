@@ -13,32 +13,32 @@ class KD_Tree {
 
 	// HELPER FUNCTIONS
 	Node* build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num, int depth);
-	void initializeHeight() { this->height = 1; }
 	int computeHeight();
 	void deallocate_tree(Node* node);
-	bool ptsIsOdd() { return (num_nodes % 2 == 0); }
+	
+	// INLINE HELPER FUNCTIONS
+	bool ptsIsEven() { return (num_nodes % 2 == 0); }
 
 	// SORTING METHODS
-	point2D* sortByX(point2D* points);
-	point2D* sortByY(point2D* points);
-	// comparison functions
 	int orderByX(point2D a, point2D b);
 	int orderByY(point2D a, point2D b);
 
 	// PRINT FUNCTIONS
 	void printInfo();
+	void printTree();
 	void printNumNodes();
 
-	// INLINE GETTERS AND SETTERS
+
+	// GETTERS AND SETTERS
 	int getHeight() { return this->height; }
 	int getNumNodes() { return this->num_nodes; }
 	Node* getRoot() { return this->root; }
 
 	void setRoot(Node* r) { this->root = r; }
 	void setHeight(int h) { this->height = h; }
+	void initializeHeight() { this->height = 1; }
 	void incrementHeight() { this->height++; }
 	void setNumNodes(int num) { this->num_nodes = num; }
-	void incrementNumNodes() { this->num_nodes++; }
 	void setPts(point2D* points) { this->pts = points; }
 
 private:

@@ -30,7 +30,7 @@ KD_Tree::KD_Tree(point2D* points, int numPoints) {
 		root->setDepth(getHeight());
 		setRoot(root); // note: Node type set to LEAF by default
 
-	} else if (numPoints == 2) {
+	} else if (numPoints == 2) {  // Case: no right side
 
 		Node* root = new Node(pts[1]);
 		root->setNumPoints(numPoints);
@@ -43,21 +43,21 @@ KD_Tree::KD_Tree(point2D* points, int numPoints) {
 		left->setDepth(getHeight() + 1);
 		root->setLeft(left);
 
-		computeHeight();
+		incrementHeight();
 
 
 	} else {
 
 		// Initialize root node
 		int median = numPoints / 2; // integer division rounds DOWN
-		// if the number of points is odd, the left array needs to be one
-		// index larger than the right
+		// if the number of points is even, the right array is one 
+		// index smaller than the left
 		// Example:
 		// 0 1 2 3 4, median index 2 --> left [0,1] right [3,4]
 		// 0 1 2 3, median 2 --> left [0,1] right [3]
-		int odd = 0;
-		if (ptsIsOdd()) {
-			odd = 1;
+		int even = 1; // for proper memory allocation and recursive params
+		if (ptsIsEven()) {
+			even = 0;
 		}
 
 		Node* root = new Node(points[median]); 
@@ -66,12 +66,15 @@ KD_Tree::KD_Tree(point2D* points, int numPoints) {
 		root->setDepth(getHeight());
 		setRoot(root);
 
-		// allocate memory for sorted arrays and initialize by copying data from pts
+		// allocate memory for sorted arrays
 		point2D* x_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* x_right = (point2D*)malloc((median - odd) * sizeof(point2D));
+		point2D* x_right = (point2D*)malloc((median - even) * sizeof(point2D));
 		point2D* y_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_right = (point2D*)malloc((median - odd) * sizeof(point2D));
+		point2D* y_right = (point2D*)malloc((median - even) * sizeof(point2D));
 
+		// initialize by copying data from pts
+		// for loops done separately because left/right arrays could
+		// be of different sizes
 		for (int i = 0; i < median; i++) {
 			x_left[i] = pts[i];
 			y_left[i] = pts[i];
@@ -82,7 +85,8 @@ KD_Tree::KD_Tree(point2D* points, int numPoints) {
 			y_right[i] = pts[i];
 		}
 
-		// TODO qsort x_left and x_right by y-coordinate and initialize y_ARRAYS
+		// TODO qsort x_left and x_right by x-coords
+		// TODO qsort y_left and y_right by y-coords
 
 		// BUILD TREE RECURSIVELY
 		root->setLeft(build_kd_tree(x_left, y_left, median, getHeight() ));
@@ -93,7 +97,7 @@ KD_Tree::KD_Tree(point2D* points, int numPoints) {
 		free(y_left);
 		free(y_right);
 
-		computeHeight();
+		setHeight(computeHeight());
 
 	}
 
@@ -115,19 +119,9 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		node->setNumPoints(median);
 		node->setDepth(depth);
 
-		// split arrays and allocate memory
-		point2D* x_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* x_right = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_right = (point2D*)malloc(median * sizeof(point2D));
-
-		// copy data from sorted x array
-		for (int i = 0; i < median; i++) {
-			x_left[i] = points_by_x[i];
-			x_right[i] = points_by_x[median + i];
-			y_left[i] = points_by_x[i];
-			y_right[i] = points_by_x[median + i];
-		}
+		// TODO ALLOCATE ARRAYS
+		// COPY DATA
+		// SORT
 
 		// TODO SORT y arrays BY Y COORDINATE
 
@@ -151,19 +145,9 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		node->setNumPoints(median);
 		node->setDepth(depth);
 
-		// split arrays and allocate memory
-		point2D* x_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* x_right = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_right = (point2D*)malloc(median * sizeof(point2D));
-
-		// copy data from sorted x array
-		for (int i = 0; i < median; i++) {
-			y_left[i] = points_by_y[i];
-			y_right[i] = points_by_y[median + i];
-			x_left[i] = points_by_y[i];
-			x_right[i] = points_by_y[median + i];
-		}
+		// TODO ALLOCATE ARRAYS
+		// COPY DATA
+		// SORT
 
 		// TODO SORT BY X-COORDINATE
 
@@ -194,7 +178,7 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 }
 
 // traverses tree from root to leftmost leaf and returns height of tree
-// if n is odd, then the "left side" array is larger than the right – thus,
+// if n is even, then the "left side" array is larger than the right – thus,
 // the longest path from root to leaf is the leftmost one
 int KD_Tree::computeHeight() {
 
@@ -208,16 +192,7 @@ int KD_Tree::computeHeight() {
 
 }
 
-// SORTING METHODS - TODO move all qsort things here -- need to?
-point2D* KD_Tree::sortByX(point2D* pts) {
-	return pts;
-}
-
-point2D* KD_Tree::sortByY(point2D* pts) {
-	return pts;
-}
-
-// comparison functions for system qsort
+// comparison functions for system qsort - todo pointers
 int KD_Tree::orderByX(point2D a, point2D b) {
 	if (fabs(a.x - b.x) < EPSILON) {
 		return (orderByY(a, b)); // if a and b have the same x-coord, order by y
@@ -230,6 +205,7 @@ int KD_Tree::orderByX(point2D a, point2D b) {
 	
 }
 
+// todo pointers
 int KD_Tree::orderByY(point2D a, point2D b) {
 	if (fabs(a.y - b.y) < EPSILON) {  // a and b have same y-coordinate
 		if( fabs(a.x - b.x) < EPSILON) { // a and b also have same x-coordinate (not likely)

@@ -1,18 +1,21 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <vector>
 
 #include "Node.h"
 
 class KD_Tree {
 
+public:
+
 	// CONSTRUCTORS AND DESTRUCTOR
 	KD_Tree();
-	KD_Tree(point2D* points, int numPoints);
+	KD_Tree(vector<point2D> points);
 	~KD_Tree();
 
 	// HELPER FUNCTIONS
-	Node* build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num, int depth);
+	Node* build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth);
 	int computeHeight();
 	void deallocate_tree(Node* node);
 	
@@ -39,12 +42,30 @@ class KD_Tree {
 	void initializeHeight() { this->height = 1; }
 	void incrementHeight() { this->height++; }
 	void setNumNodes(int num) { this->num_nodes = num; }
-	void setPts(point2D* points) { this->pts = points; }
+	void setPts(vector<point2D> points) { this->pts = points; }
 
 private:
 	Node* root;
 	int height;
 	int num_nodes;
-	point2D* pts;
+	vector<point2D> pts;
+
+	struct _sortByX {
+		bool operator() (const point2D &p1, const point2D &p2) { 
+			if (fabs(p1.x - p2.x) < EPSILON) {
+				return (p1.y < p2.y);
+			}
+			return (p1.x < p2.x); 
+		}
+	} sortByX;
+
+	struct _sortByY {
+		bool operator() (const point2D &p1, const point2D &p2) { 
+			if (fabs(p1.y - p2.y) < EPSILON) {
+				return (p1.x < p2.x);
+			}
+			return (p1.y < p2.y); 
+		}
+	} sortByY;
 
 };

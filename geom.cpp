@@ -5,7 +5,7 @@
 #include "geom.h"
 
 void printPoint(point2D p) {
-	printf("point (%lf, %lf)\n", p.x, p.y);
+	printf("(%lf, %lf)\n", p.x, p.y);
 	fflush(stdout);
 }
 

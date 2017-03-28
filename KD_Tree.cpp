@@ -4,140 +4,179 @@
 
 #include "KD_Tree.h"
 
+using namespace std;
+
 // DEFAULT CONSTRUCTOR
 KD_Tree::KD_Tree() {
 	setRoot(NULL); 
 	setHeight(0); 
 	setNumNodes(0); 
-	setPts(NULL);
 }
 
 // CONSTRUCTOR 
-KD_Tree::KD_Tree(point2D* points, int numPoints) {
+KD_Tree::KD_Tree(vector<point2D> points) {
 
 	// check that input is valid and numPoints is strictly positive
-	assert(points);
-	assert(numPoints > 0);
+	// assert(points);
+	assert(points.size() > 0);
 
-	setPts(points); // save points array in tree
-	setNumNodes(numPoints); 
+	setPts(points); // save points vector in tree
+	setNumNodes(points.size()); 
 	initializeHeight();
 
-	if (numPoints == 1) {
+	if (num_nodes == 1) {
 
 		Node* root = new Node(pts[0]);
-		root->setNumPoints(numPoints);
+		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		setRoot(root); // note: Node type set to LEAF by default
 
-	} else if (numPoints == 2) {  // Case: no right side
+	} else if (num_nodes == 2) {  // Case: no right side
 
 		Node* root = new Node(pts[1]);
-		root->setNumPoints(numPoints);
+		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		root->setType(INITIAL_CUT);
 		setRoot(root);
 
 		Node* left = new Node(pts[0]); // type set to LEAF by default
-		left->setNumPoints(numPoints - 1);
+		left->setNumPoints(num_nodes - 1);
 		left->setDepth(getHeight() + 1);
 		root->setLeft(left);
 
 		incrementHeight();
 
-
 	} else {
 
 		// Initialize root node
-		int median = numPoints / 2; // integer division rounds DOWN
+		int median = num_nodes / 2; 
+
+		Node* root = new Node(points[median]); 
+		root->setType(INITIAL_CUT);
+		root->setNumPoints(num_nodes);
+		root->setDepth(getHeight());
+		setRoot(root);
+
+		// declare vectors for sorted arrays
+		vector<point2D> x_left, x_right, y_left, y_right;
+
+		// initialize by copying data from pts
+		// for loops done separately because left/right arrays could
+		// be of different sizes 
 		// if the number of points is even, the right array is one 
 		// index smaller than the left
 		// Example:
 		// 0 1 2 3 4, median index 2 --> left [0,1] right [3,4]
 		// 0 1 2 3, median 2 --> left [0,1] right [3]
-		int even = 1; // for proper memory allocation and recursive params
-		if (ptsIsEven()) {
-			even = 0;
-		}
-
-		Node* root = new Node(points[median]); 
-		root->setType(INITIAL_CUT);
-		root->setNumPoints(numPoints);
-		root->setDepth(getHeight());
-		setRoot(root);
-
-		// allocate memory for sorted arrays
-		point2D* x_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* x_right = (point2D*)malloc((median - even) * sizeof(point2D));
-		point2D* y_left = (point2D*)malloc(median * sizeof(point2D));
-		point2D* y_right = (point2D*)malloc((median - even) * sizeof(point2D));
-
-		// initialize by copying data from pts
-		// for loops done separately because left/right arrays could
-		// be of different sizes
 		for (int i = 0; i < median; i++) {
-			x_left[i] = pts[i];
-			y_left[i] = pts[i];
+			x_left.push_back(pts[i]);
+			y_left.push_back(pts[i]);
 		} 
 
-		for (int i = median + 1; i < numPoints; i++) {
-			x_right[i] = pts[i];
-			y_right[i] = pts[i];
+		for (int i = median + 1; i < num_nodes; i++) {
+			x_right.push_back(pts[i]);
+			y_right.push_back(pts[i]);
 		}
 
-		// TODO qsort x_left and x_right by x-coords
-		// TODO qsort y_left and y_right by y-coords
+		sort(x_left.begin(), x_left.end(), sortByX);
+		sort(x_right.begin(), x_right.end(), sortByX);
+		sort(y_left.begin(), y_left.end(), sortByY);
+		sort(y_right.begin(), y_right.end(), sortByY);
 
 		// BUILD TREE RECURSIVELY
-		root->setLeft(build_kd_tree(x_left, y_left, median, getHeight() ));
-		root->setRight(build_kd_tree(x_right, y_right, median, getHeight() ));
+		if (DEBUG) {
+			printf("RECURSIVE CALL\n");
+		}
+		root->setLeft(build_kd_tree(x_left, y_left, getHeight() + 1 ));
+		root->setRight(build_kd_tree(x_right, y_right, getHeight() + 1));
+		printf("RECURSIVE CALL HERE\n"); fflush(stdout);
 
-		free(x_left);
-		free(x_right);
-		free(y_left);
-		free(y_right);
-
-		setHeight(computeHeight());
+		// setHeight(computeHeight());
 
 	}
 
 }
 
-// INITIALIZATION AND HELPER FUNCTIONS - TODO 
-Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num, int depth) {
 
-	assert(num > 0); // TODO IF THIS FAILS DEBUG!! --> print statement
-	int median = num / 2;
+Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth) {
+
+	
 	setHeight(depth);
+	
+	int num = points_by_x.size();
+	int median = num / 2;
 
-	// if only one point, return leaf containing point
-	if (depth % 2 == 0 && num > 1) {
+	if (num == 0) {
+		return NULL;
+	}
 
-		// add node to the tree
+	if (DEBUG) {
+		printf("num is %d\n", num);
+		printf("median is %d\n", median);
+	}
+
+	// If there are only two points in the vectors that are passed in,
+	// then the first point is the left child of the second, and the second has no right node. 
+	// thus, we don't have a right "side" and can't make a recursive call on it.
+	bool rightNode = true;
+	if (median == num) { 
+		rightNode = false; 
+	}
+
+	// BASE CASE: if only one point, return leaf containing point
+	if (num == 1) {
+
+		printf("LEAF at depth %d\n", depth);
+		assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
+		Node* node = new Node(points_by_x[0]); // default type is LEAF
+		node->setNumPoints(num);
+		node->setDepth(depth);
+		node->setLeft(NULL);
+		node->setRight(NULL);
+		return node;
+
+	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this node
+
+		// create new node and add median point to the tree
 		Node* node = new Node(points_by_x[median]);
 		node->setType(VERTICAL);
 		node->setNumPoints(median);
 		node->setDepth(depth);
 
-		// TODO ALLOCATE ARRAYS
+		// cut type is vertical, so split x-array into two parts and
+		// sort the parts by y-coordinate
+		vector<point2D> x_left, x_right, y_left, y_right;
+
 		// COPY DATA
-		// SORT
+		for (int i = 0; i < median; i++) {
+			x_left.push_back(pts[i]);
+			y_left.push_back(pts[i]);
+		} 
 
-		// TODO SORT y arrays BY Y COORDINATE
+		// SORT BY Y-COORDINATE
+		sort(y_left.begin(), y_left.end(), sortByY);
 
-		// recursive call
-		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
-		node->setRight(build_kd_tree(x_right, x_right, median, depth + 1));
+		if (rightNode) {
+			// copy
+			for (int i = median + 1; i < num; i++) {
+				x_right.push_back(pts[i]);
+				y_right.push_back(pts[i]);
+			}
+			// sort
+			sort(y_right.begin(), y_right.end(), sortByY);
 
-		// free arrays before returning
-		free(x_left);
-		free(x_right);
-		free(y_left);
-		free(y_right);
+		}
+
+		// recursive calls
+		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
+		if (rightNode) {
+			node->setRight(build_kd_tree(x_right, x_right, depth + 1));
+		}
+		
 
 		return node;
 
-	} else if (depth % 2 != 0 && num > 1) {
+	} else {   // depth is even and num > 1
 
 		// add node to the tree
 		Node* node = new Node(points_by_y[median]);
@@ -145,35 +184,37 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 		node->setNumPoints(median);
 		node->setDepth(depth);
 
-		// TODO ALLOCATE ARRAYS
-		// COPY DATA
-		// SORT
+		// cut type is horizontal, so split y-array into two parts and
+		// sort the parts by x-coordinate
+		// LEFT refers to the part above the horizontal line, RIGHT
+		// refers to the points below it
+		vector<point2D> x_left, x_right, y_left, y_right;
 
-		// TODO SORT BY X-COORDINATE
+		// COPY DATA
+		for (int i = 0; i < median; i++) {
+			x_left.push_back(pts[i]);
+			y_left.push_back(pts[i]);
+		} 
+
+		// SORT BY X-COORDINATE
+		sort(x_left.begin(), x_left.end(), sortByX);
+
+		if (rightNode) {
+			for (int i = median + 1; i < num; i++) {
+				x_right.push_back(pts[i]);
+				y_right.push_back(pts[i]);
+			}
+			sort(x_right.begin(), x_right.end(), sortByX);
+		}
 
 		// recursive call
-		node->setLeft(build_kd_tree(x_left, y_left, median, depth + 1));
-		node->setRight(build_kd_tree(x_right, x_right, median, depth + 1));
-
-		// free arrays before returning
-		free(x_left);
-		free(x_right);
-		free(y_left);
-		free(y_right);
+		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
+		if (rightNode) {
+			node->setRight(build_kd_tree(x_right, x_right, depth + 1));
+		}
 
 		return node;
 	}
-
-	// BASE CASE: IF NUMBER OF POINTS IS 1, RETURN A LEAF
-	if (DEBUG) {
-		printf("num should be 1 and is %d\n", num);
-	}
-
-	assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
-	Node* node = new Node(points_by_x[0]); // default type is LEAF
-	node->setNumPoints(num);
-	node->setDepth(depth);
-	return node;
 
 }
 
@@ -183,8 +224,15 @@ Node* KD_Tree::build_kd_tree(point2D* points_by_x, point2D* points_by_y, int num
 int KD_Tree::computeHeight() {
 
 	Node* temp = root;
-	int height = 0;
-	while (temp->isLeaf()) {
+	int height = 1;
+
+	if (DEBUG){
+		printf("height is %d\n", getHeight());
+		printf("temp->isLeaf returns %d\n", temp->isLeaf());
+		printf("temp->left is %d\n", temp->getLeft()->isLeaf());
+	}
+
+	while (!temp->isLeaf()) {
 		height++; 
 		temp = temp->getLeft();
 	}
@@ -223,14 +271,15 @@ int KD_Tree::orderByY(point2D a, point2D b) {
 // PRINT FUNCTIONS
 
 void KD_Tree::printInfo() {
+	printf("\nTREE INFO\n");
 	printNumNodes();
 	printf("Height: %d\n", getHeight() );
-	printf("Root: \n");
+	printf("Root: ");
 	root->printInfo(); // flushes STDOUT
 }
 
 void KD_Tree::printNumNodes() {
-	printf("Number of nodes %d\n", getNumNodes());
+	printf("Number of nodes: %d\n", getNumNodes());
 }
 
 // recurse through entire tree and call destructors of all nodes
@@ -252,8 +301,5 @@ KD_Tree::~KD_Tree() {
 	// delete all nodes of the tree
 	deallocate_tree(getRoot());
 	delete(getRoot());
-
-	// deallocate array TODO DOUBLE CHECK -- DONE IN MAIN?
-	// free(pts);
 
 }

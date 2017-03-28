@@ -22,3 +22,9 @@ PART I: BUILD KD TREE
 
 PART II: VISUALIZE TREE LIKE A MONDRIAN PAINTING
 - 
+
+
+DATA STRUCTURES
+
+VARIABLES/DEFINES
+- DEBUG, boolean defined in geom.h that only executes certain statements (e.g. prints) for debugging

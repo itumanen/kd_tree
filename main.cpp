@@ -1,6 +1,15 @@
 #include "KD_Tree.h"
 
-point2D* points; // global for graphics code
+using namespace std;
+
+/* GLOBAL VECTORS -- FOR GRAPHICS CODE */
+vector<point2D> points; 
+int num_points;
+const int WINDOWSIZE = 500; 
+
+/* FORWARD DECLARATIONS OF FUNCTIONS */
+void print_points();
+void initialize_points_random();
 
 
 int main(int argc, char** argv) {
@@ -8,8 +17,49 @@ int main(int argc, char** argv) {
 	printf("INITIAL CUT %d\n", INITIAL_CUT);
 
 	// READ NUM OF POINTS FROM COMMAND LINE
+	if (argc!= 2) {
+	  printf("usage: main <number_of_points>\n"); fflush(stdout);
+	  exit(EXIT_FAILURE); 
+	}
 
-	// initialize points
-	// points = (point2D*)malloc(num_points * sizeof(point2D));
-	return 0;
+	num_points = atoi(argv[1]); 
+	printf("You entered = %d\n", num_points);
+	assert(num_points > 0); 
+
+	// INITIALIZE POINTS AT RANDOM
+	initialize_points_random();
+
+	if (DEBUG) {
+		print_points();
+	}
+
+	// BUILD KD TREE
+	KD_Tree* tree = new KD_Tree(points);
+	tree->printInfo();
+
+	return (EXIT_SUCCESS);
+
+}
+
+void print_points() {
+	printf("POINTS VECTOR\n");
+	for (int i = 0; i < points.size(); i++) {
+		printPoint(points[i]);
+	}
+}
+
+void initialize_points_random() {
+  
+ 	//clear the vector just to be safe 
+ 	points.clear(); 
+
+ 	int i; 
+ 	point2D p; 
+
+ 	for (i = 0; i < num_points; i++) {
+ 		p.x = (double)(.3*WINDOWSIZE)/2 + (double)random() / RAND_MAX * (((double)(.7*WINDOWSIZE)) - (double)(.3*WINDOWSIZE)/2);
+ 		p.y =  (double)(.3*WINDOWSIZE)/2 + (double)random() / RAND_MAX * (((double)(.7*WINDOWSIZE)) - (double)(.3*WINDOWSIZE)/2);
+ 		points.push_back(p);
+	}
+
 }

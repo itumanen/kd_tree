@@ -34,7 +34,15 @@ void Node::printInfo() {
 }
 
 void Node::printType() {
-	printf("Type: %d\n", getType() );
+	string type;
+	if (getType() == VERTICAL) {
+		type = "VERTICAL";
+	} else if (getType() == HORIZONTAL) {
+		type = "HORIZONTAL";
+	} else if (getType() == LEAF) {
+		type = "LEAF";
+	}
+	printf("Type: %s\n", type.c_str());
 }
 
 // TODO not necessary?

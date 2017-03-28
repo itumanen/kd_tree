@@ -103,24 +103,35 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 }
 
 
+
+// HELPER FUNCTIONS
+/*
+Recursively builds KD tree; takes vectors of points sorted by x/y and the current depth (height)
+of the tree and returns a pointer to a node, which is stored as the left or the right node of the parent.
+Base cases: 
+- Vector of points only contains one point -- this is a leaf; the children of this node are NULL.
+- Vector of points is empty -- this happens AFTER the vector only has two points. That node will only
+	have a left child and will pass an empty vector to the recursive call. This could be handled within 
+	the if/else block but to ensure that the function exits with a return value, the code for this base 
+	executes if the first three conditions fail. 
+IF/ELSE block:
+- If the vector only has one point (base case)
+- If the vector has more than one point and the depth is odd, then the cut type is VERTICAL. 
+- If the vector has more than one point and the depth is even, then the cut type is HORIZONTAL.
+PARAMETERS
+- vectors of the same n points sorted by their x-coordinates, and sorted by their y-coordinates. The size
+	of these is approximately half (+/- 1) of the size of the vectors at the previous level.
+- the value of depth is the height of the tree AFTER the new nodes have been created, so that the height of the 
+	tree does not change if the vector is empty (and no node is added)
+*/ 
 Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth) {
-	
-	setHeight(depth);
-	
+
 	int num = points_by_x.size();
 	int median = num / 2;
 
 	if (DEBUG) {
 		printf("num is %d\n", num);
 		printf("median is %d\n", median);
-	}
-
-	// If there are only two points in the vectors that are passed in,
-	// then the first point is the left child of the second, and the second has no right node. 
-	// thus, we don't have a right "side" and can't make a recursive call on it.
-	bool rightNode = true;
-	if (median == num) { 
-		rightNode = false; 
 	}
 
 	// BASE CASE: if only one point, return leaf containing point
@@ -134,8 +145,10 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		Node* node = new Node(points_by_x[0]); // default type is LEAF
 		node->setNumPoints(num);
 		node->setDepth(depth);
-		node->setLeft(NULL);
+		node->setLeft(NULL); // redundant but here for sanity checks
 		node->setRight(NULL);
+		
+		setHeight(depth);
 		return node;
 
 	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this node
@@ -170,6 +183,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
 		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
 
+		setHeight(depth);
 		return node;
 
 	} else if (depth % 2 == 0 && num > 1) {   // depth is even and num > 1
@@ -206,6 +220,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
 		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
 
+		setHeight(depth);
 		return node;
 	}
 
@@ -215,19 +230,19 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 	return NULL;
 }
 
-// traverses tree from root to leftmost leaf and returns height of tree
-// if n is even, then the "left side" array is larger than the right – thus,
-// the longest path from root to leaf is the leftmost one
+
+/* Returns an int whose value is the height of the tree. 
+For checking correctness: HEIGHT = CEIL ( lg(NUM_NODES) )
+traverses tree from root to leftmost leaf, increments a counter, and returns that value
+If n is even, then the "left side" array is larger than the right – thus,
+the longest path from root to leaf is the leftmost one.
+Height is computed on the fly; this method was originally written to make sure that those
+values were correct. It is redundant to leave it in, but it serves as a sanity check.
+*/
 int KD_Tree::computeHeight() {
 
 	Node* temp = root;
 	int height = 1;
-
-	// if (DEBUG){
-	// 	printf("height is %d\n", getHeight());
-	// 	printf("temp->isLeaf returns %d\n", temp->isLeaf());
-	// 	printf("temp->left is %d\n", temp->getLeft()->isLeaf());
-	// }
 
 	while (!temp->isLeaf()) {
 		height++; 
@@ -236,6 +251,9 @@ int KD_Tree::computeHeight() {
 	return height;
 
 }
+
+
+
 
 // PRINT FUNCTIONS
 
@@ -247,17 +265,26 @@ void KD_Tree::printInfo() {
 	root->printInfo(); // flushes STDOUT
 }
 
+
+/* PRINTS NODES IN TREE -- LEVEL ORDER TREE TRAVERSAL?
+*/
 void KD_Tree::printTree() {
 	if(!getRoot()) {
 		printf("Root is NULL; tree is empty.\n");
 	}
+
 }
 
 void KD_Tree::printNumNodes() {
 	printf("Number of nodes: %d\n", getNumNodes());
 }
 
-// recurse through entire tree and call destructors of all nodes
+
+
+/* Helper function for the destructor
+Recurses through entire tree and call Node destructor to deallocate 
+(delete) every node in the tree. 
+*/
 void KD_Tree::deallocate_tree(Node* node) {
 
 	if (node->isLeaf()) {
@@ -270,11 +297,13 @@ void KD_Tree::deallocate_tree(Node* node) {
 
 }
 
-// DESTRUCTOR
-KD_Tree::~KD_Tree() {
 
-	// delete all nodes of the tree
+
+/* DESTRUCTOR
+delete nodes from leaves to the root's left/right children,
+then delete root
+*/
+KD_Tree::~KD_Tree() {
 	deallocate_tree(getRoot());
 	delete(getRoot());
-
 }

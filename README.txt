@@ -14,7 +14,7 @@ PART I: BUILD KD TREE
 	* Error messages for assert?  -- less important
 	* MAIN FILE!!! look at previous projects
 	* PRINT TREE METHOD
-	* depth value is wrong........
+	* resize/shrink to fit or declare size of vector for space optimization
 - Known Bugs (and "bugs"):
 	* setting height during recursive calls originally yielded incorrect results – this isn't a real bug anymore, but
 	  the extra computeHeight() is still called at the end of constructor as a sanity check even though it's redundant

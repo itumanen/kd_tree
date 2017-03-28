@@ -149,12 +149,12 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 
 		// COPY DATA
 		for (int i = 0; i < median; i++) {
-			x_left.push_back(pts[i]);
-			y_left.push_back(pts[i]);
+			x_left.push_back(points_by_x[i]);
+			y_left.push_back(points_by_x[i]);
 		} 
 		for (int i = median + 1; i < num; i++) {
-			x_right.push_back(pts[i]);
-			y_right.push_back(pts[i]);
+			x_right.push_back(points_by_x[i]);
+			y_right.push_back(points_by_x[i]);
 		}
 
 		// SORT BY Y-COORDINATE
@@ -183,12 +183,12 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 
 		// COPY DATA
 		for (int i = 0; i < median; i++) {
-			x_left.push_back(pts[i]);
-			y_left.push_back(pts[i]);
+			x_left.push_back(points_by_y[i]);
+			y_left.push_back(points_by_y[i]);
 		} 
 		for (int i = median + 1; i < num; i++) {
-			x_right.push_back(pts[i]);
-			y_right.push_back(pts[i]);
+			x_right.push_back(points_by_y[i]);
+			y_right.push_back(points_by_y[i]);
 		}
 
 		// SORT BY X-COORDINATE
@@ -238,6 +238,12 @@ void KD_Tree::printInfo() {
 	printf("Height: %d\n", getHeight() );
 	printf("Root: ");
 	root->printInfo(); // flushes STDOUT
+}
+
+void KD_Tree::printTree() {
+	if(!getRoot()) {
+		printf("Root is NULL; tree is empty.\n");
+	}
 }
 
 void KD_Tree::printNumNodes() {

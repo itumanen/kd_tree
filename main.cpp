@@ -14,8 +14,6 @@ void initialize_points_random();
 
 int main(int argc, char** argv) {
 
-	printf("INITIAL CUT %d\n", INITIAL_CUT);
-
 	// READ NUM OF POINTS FROM COMMAND LINE
 	if (argc!= 2) {
 	  printf("usage: main <number_of_points>\n"); fflush(stdout);
@@ -23,12 +21,13 @@ int main(int argc, char** argv) {
 	}
 
 	num_points = atoi(argv[1]); 
-	printf("You entered = %d\n", num_points);
+	printf("Input: %d points.\n", num_points);
 
 	// if num points is zero, create empty tree with default constructor
-	if (num_points > 0) {
-		printf("Creating empty tree with no points!\n");
+	if (num_points == 0) {
 		KD_Tree* tree = new KD_Tree();
+		tree->printTree();
+		printf("Exiting.\n");
 		return (EXIT_SUCCESS); // todo see if something else should be done
 	}
 	

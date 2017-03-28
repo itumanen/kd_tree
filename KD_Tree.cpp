@@ -106,9 +106,9 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 	int num = points_by_x.size();
 	int median = num / 2;
 
-	if (num == 0) {
-		return NULL;
-	}
+	// if (num == 0) {
+	// 	return NULL;
+	// }
 
 	if (DEBUG) {
 		printf("num is %d\n", num);
@@ -152,31 +152,22 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 			x_left.push_back(pts[i]);
 			y_left.push_back(pts[i]);
 		} 
+		for (int i = median + 1; i < num; i++) {
+			x_right.push_back(pts[i]);
+			y_right.push_back(pts[i]);
+		}
 
 		// SORT BY Y-COORDINATE
 		sort(y_left.begin(), y_left.end(), sortByY);
-
-		if (rightNode) {
-			// copy
-			for (int i = median + 1; i < num; i++) {
-				x_right.push_back(pts[i]);
-				y_right.push_back(pts[i]);
-			}
-			// sort
-			sort(y_right.begin(), y_right.end(), sortByY);
-
-		}
+		sort(y_right.begin(), y_right.end(), sortByY);
 
 		// recursive calls
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
-		if (rightNode) {
-			node->setRight(build_kd_tree(x_right, x_right, depth + 1));
-		}
-		
+		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
 
 		return node;
 
-	} else {   // depth is even and num > 1
+	} else if (depth % 2 == 0 && num > 1) {   // depth is even and num > 1
 
 		// add node to the tree
 		Node* node = new Node(points_by_y[median]);
@@ -195,27 +186,26 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 			x_left.push_back(pts[i]);
 			y_left.push_back(pts[i]);
 		} 
+		for (int i = median + 1; i < num; i++) {
+			x_right.push_back(pts[i]);
+			y_right.push_back(pts[i]);
+		}
 
 		// SORT BY X-COORDINATE
 		sort(x_left.begin(), x_left.end(), sortByX);
-
-		if (rightNode) {
-			for (int i = median + 1; i < num; i++) {
-				x_right.push_back(pts[i]);
-				y_right.push_back(pts[i]);
-			}
-			sort(x_right.begin(), x_right.end(), sortByX);
-		}
+		sort(x_right.begin(), x_right.end(), sortByX);
 
 		// recursive call
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
-		if (rightNode) {
-			node->setRight(build_kd_tree(x_right, x_right, depth + 1));
-		}
+		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
 
 		return node;
 	}
 
+	// ELSE
+	// if the arrays are empty (ex: there is no right leaf for Node n), 
+	// return NULL to set n->right to NULL
+	return NULL;
 }
 
 // traverses tree from root to leftmost leaf and returns height of tree

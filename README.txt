@@ -15,6 +15,8 @@ PART I: BUILD KD TREE
 	* MAIN FILE!!! look at previous projects
 	* test code on small inputs + compare results by hand
 	* PRINT TREE METHOD
+	* double check "right subtree" check for nodes that only have one child
+	* make sure all array names are correct in recursive function
 - Known Bugs:
 	* setting height during recursive calls could yield incorrect results - thus this isn't done on the fly, but before exiting the constructor
 	* if number of points is odd, the right-side array needs to be allocated one space more

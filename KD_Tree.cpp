@@ -230,34 +230,6 @@ int KD_Tree::computeHeight() {
 
 }
 
-// comparison functions for system qsort - todo pointers
-int KD_Tree::orderByX(point2D a, point2D b) {
-	if (fabs(a.x - b.x) < EPSILON) {
-		return (orderByY(a, b)); // if a and b have the same x-coord, order by y
-	}
-	if (a.x < b.x) {
-		return -1;
-	}
-	// (a.x > b.x) 	
-	return 1;
-	
-}
-
-// todo pointers
-int KD_Tree::orderByY(point2D a, point2D b) {
-	if (fabs(a.y - b.y) < EPSILON) {  // a and b have same y-coordinate
-		if( fabs(a.x - b.x) < EPSILON) { // a and b also have same x-coordinate (not likely)
-			return 0;
-		}
-		return (orderByX(a, b)); // same y-coord but different x-coord, sort by x
-	}
-	if (a.y < b.y) {
-		return -1; 
-	}
-	// a.y > b.y)
-		return 1;
-}
-
 // PRINT FUNCTIONS
 
 void KD_Tree::printInfo() {

@@ -24,8 +24,14 @@ int main(int argc, char** argv) {
 
 	num_points = atoi(argv[1]); 
 	printf("You entered = %d\n", num_points);
-	assert(num_points > 0); 
 
+	// if num points is zero, create empty tree with default constructor
+	if (num_points > 0) {
+		printf("Creating empty tree with no points!\n");
+		KD_Tree* tree = new KD_Tree();
+		return (EXIT_SUCCESS); // todo see if something else should be done
+	}
+	
 	// INITIALIZE POINTS AT RANDOM
 	initialize_points_random();
 

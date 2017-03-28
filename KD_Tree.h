@@ -22,10 +22,6 @@ public:
 	// INLINE HELPER FUNCTIONS
 	bool ptsIsEven() { return (num_nodes % 2 == 0); }
 
-	// SORTING METHODS
-	int orderByX(point2D a, point2D b);
-	int orderByY(point2D a, point2D b);
-
 	// PRINT FUNCTIONS
 	void printInfo();
 	void printTree();
@@ -50,6 +46,7 @@ private:
 	int num_nodes;
 	vector<point2D> pts;
 
+	// STRUCTS FOR SORTING POINT VECTORS BY COORDINATE
 	struct _sortByX {
 		bool operator() (const point2D &p1, const point2D &p2) { 
 			if (fabs(p1.x - p2.x) < EPSILON) {

@@ -11,14 +11,13 @@ PART I: BUILD KD TREE
 - TODO: 
 	* add rtimer code to makefile + use to compute the run time of KD tree construction
 	* To use less space, declare enum using chars instead of ints
-	* Error messages for assert? 
+	* Error messages for assert?  -- less important
 	* MAIN FILE!!! look at previous projects
-	* test code on small inputs + compare results by hand
 	* PRINT TREE METHOD
-	* make sure all array names are correct in recursive function
-- Known Bugs:
-	* setting height during recursive calls could yield incorrect results - thus this isn't done on the fly, but before exiting the constructor
-	* if number of points is odd, the right-side array needs to be allocated one space more
+	* depth value is wrong........
+- Known Bugs (and "bugs"):
+	* setting height during recursive calls originally yielded incorrect results – this isn't a real bug anymore, but
+	  the extra computeHeight() is still called at the end of constructor as a sanity check even though it's redundant
 
 
 PART II: VISUALIZE TREE LIKE A MONDRIAN PAINTING

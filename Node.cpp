@@ -8,6 +8,7 @@ Node::Node() {
 	null_point.y = 0.0;
 	setPoint(null_point); 
 	setType(LEAF); 
+	setRoot(false);
 	setNumPoints(0); 
 	setDepth(0); 
 	setLeft(NULL);
@@ -20,6 +21,7 @@ Node::Node(point2D point) {
 
 	// default; these get set when kd-tree is built
 	setType(LEAF); 
+	setRoot(false);
 	setDepth(1);
 	setLeft(NULL);
 	setRight(NULL);
@@ -29,19 +31,22 @@ Node::Node(point2D point) {
 void Node::printInfo() {
 	printPoint(getPoint());
 	printType();
-	printNumPoints();
+	if (!isRoot()) { // tree handles this if root is being printed
+		printNumPoints();
+	}
 	fflush(stdout);
 }
 
 void Node::printType() {
 	string type;
+	if (isRoot()) return; // tree will state if it's printing the root
 	if (getType() == VERTICAL) {
 		type = "VERTICAL";
 	} else if (getType() == HORIZONTAL) {
 		type = "HORIZONTAL";
 	} else if (getType() == LEAF) {
 		type = "LEAF";
-	}
+	} 
 	printf("Type: %s\n", type.c_str());
 }
 

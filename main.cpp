@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
 	// READ NUM OF POINTS FROM COMMAND LINE
 	if (argc!= 2) {
 	  printf("usage: main <number_of_points>\n"); fflush(stdout);
-	  exit(EXIT_FAILURE); 
+	  return(EXIT_FAILURE); 
 	}
 
 	num_points = atoi(argv[1]); 

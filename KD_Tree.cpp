@@ -17,7 +17,6 @@ KD_Tree::KD_Tree() {
 KD_Tree::KD_Tree(vector<point2D> points) {
 
 	// check that input is valid and numPoints is strictly positive
-	// assert(points);
 	assert(points.size() > 0);
 
 	setPts(points); // save points vector in tree
@@ -29,6 +28,7 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 		Node* root = new Node(pts[0]);
 		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
+		root->setRoot(true);
 		setRoot(root); // note: Node type set to LEAF by default
 
 	} else if (num_nodes == 2) {  // Case: no right side
@@ -37,6 +37,7 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		root->setType(INITIAL_CUT);
+		root->setRoot(true);
 		setRoot(root);
 
 		Node* left = new Node(pts[0]); // type set to LEAF by default
@@ -44,7 +45,7 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 		left->setDepth(getHeight() + 1);
 		root->setLeft(left);
 
-		incrementHeight();
+		setHeight(computeHeight());
 
 	} else {
 
@@ -55,6 +56,7 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 		root->setType(INITIAL_CUT);
 		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
+		root->setRoot(true);
 		setRoot(root);
 
 		// declare vectors for sorted arrays
@@ -85,13 +87,16 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 
 		// BUILD TREE RECURSIVELY
 		if (DEBUG) {
-			printf("RECURSIVE CALL\n");
+			printf("RECURSIVE CALL\n"); fflush(stdout);
 		}
-		root->setLeft(build_kd_tree(x_left, y_left, getHeight() + 1 ));
-		root->setRight(build_kd_tree(x_right, y_right, getHeight() + 1));
-		printf("RECURSIVE CALL HERE\n"); fflush(stdout);
 
-		// setHeight(computeHeight());
+		// use the depth of the root (height of the tree at root node) for
+		// recursive call because the height is updated during the call
+		root->setLeft(build_kd_tree(x_left, y_left, root->getDepth() + 1 ));
+		root->setRight(build_kd_tree(x_right, y_right, root->getDepth() + 1));
+
+		// redundant, but was implemented as a sanity check
+		setHeight(computeHeight());
 
 	}
 
@@ -99,16 +104,11 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 
 
 Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth) {
-
 	
 	setHeight(depth);
 	
 	int num = points_by_x.size();
 	int median = num / 2;
-
-	// if (num == 0) {
-	// 	return NULL;
-	// }
 
 	if (DEBUG) {
 		printf("num is %d\n", num);
@@ -124,9 +124,12 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 	}
 
 	// BASE CASE: if only one point, return leaf containing point
+	// If the height of the tree is ODD at the new node, then the cut type is VERTICAL
+	// ie, at the root the height is 1 and the initial cut is VERTICAL
+	// Thus if the height is even then the cut type is HORIZONTAL
 	if (num == 1) {
 
-		printf("LEAF at depth %d\n", depth);
+		if (DEBUG) printf("LEAF at depth %d\n", depth);
 		assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
 		Node* node = new Node(points_by_x[0]); // default type is LEAF
 		node->setNumPoints(num);
@@ -136,6 +139,8 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		return node;
 
 	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this node
+
+		// if (DEBUG) printf("VERTICAL at depth%d\n", depth);
 
 		// create new node and add median point to the tree
 		Node* node = new Node(points_by_x[median]);
@@ -168,6 +173,8 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		return node;
 
 	} else if (depth % 2 == 0 && num > 1) {   // depth is even and num > 1
+
+		// if (DEBUG) printf("HORIZONTAL at depth%d\n", depth);
 
 		// add node to the tree
 		Node* node = new Node(points_by_y[median]);
@@ -216,11 +223,11 @@ int KD_Tree::computeHeight() {
 	Node* temp = root;
 	int height = 1;
 
-	if (DEBUG){
-		printf("height is %d\n", getHeight());
-		printf("temp->isLeaf returns %d\n", temp->isLeaf());
-		printf("temp->left is %d\n", temp->getLeft()->isLeaf());
-	}
+	// if (DEBUG){
+	// 	printf("height is %d\n", getHeight());
+	// 	printf("temp->isLeaf returns %d\n", temp->isLeaf());
+	// 	printf("temp->left is %d\n", temp->getLeft()->isLeaf());
+	// }
 
 	while (!temp->isLeaf()) {
 		height++; 

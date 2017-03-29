@@ -17,6 +17,8 @@ public:
 	// HELPER FUNCTIONS
 	Node* build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth);
 	int computeHeight();
+	void levelOrderPts();
+	void addLevel(Node* node, int depth);
 	void deallocate_tree(Node* node);
 	
 	// INLINE HELPER FUNCTIONS
@@ -43,6 +45,7 @@ private:
 	int height;
 	int num_nodes;
 	vector<point2D> pts;
+	vector<Node*> level_ordered_pts;
 
 	// STRUCTS FOR SORTING POINT VECTORS BY COORDINATE
 	struct _sortByX {

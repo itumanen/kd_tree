@@ -9,7 +9,6 @@ Node::Node() {
 	setPoint(null_point); 
 	setType(LEAF); 
 	setRoot(false);
-	setNumPoints(0); 
 	setDepth(0); 
 	setLeft(NULL);
 	setRight(NULL);
@@ -17,7 +16,6 @@ Node::Node() {
 
 Node::Node(point2D point) {
 	setPoint(point);
-	setNumPoints(0); // todo this is default for now
 
 	// default; these get set when kd-tree is built
 	setType(LEAF); 
@@ -31,9 +29,7 @@ Node::Node(point2D point) {
 void Node::printInfo() {
 	printPoint(getPoint());
 	printType();
-	if (!isRoot()) { // tree handles this if root is being printed
-		printNumPoints();
-	}
+	printf("Depth: %d\n", getDepth());
 	fflush(stdout);
 }
 
@@ -49,11 +45,7 @@ void Node::printType() {
 	} 
 	printf("Type: %s\n", type.c_str());
 }
-
-// TODO not necessary?
-void Node::printNumPoints() {
-	printf("Number of points in region: %d\n", getNumPoints() );
-} 
+ 
 
 Node::~Node() {
 	delete(left);

@@ -4,7 +4,7 @@
 #include <math.h>
 
 #define EPSILON 0.00000001
-#define DEBUG true
+#define DEBUG false
 
 // Used by Node and KD_Tree classes - helps distinguish
 // nodes that are leaves in the tree as well as nodes that

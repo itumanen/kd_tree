@@ -16,17 +16,16 @@ KD_Tree::KD_Tree() {
 // CONSTRUCTOR 
 KD_Tree::KD_Tree(vector<point2D> points) {
 
-	// check that input is valid and numPoints is strictly positive
+	// check that input is valid / the number of points is strictly positive
 	assert(points.size() > 0);
-
-	setPts(points); // save points vector in tree
+	sort(points.begin(), points.end(), sortByX); // sort input vector by x-coords
+	setPts(points); // save points as initialized to class
 	setNumNodes(points.size()); 
 	initializeHeight();
 
 	if (num_nodes == 1) {
 
 		Node* root = new Node(pts[0]);
-		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		root->setRoot(true);
 		setRoot(root); // note: Node type set to LEAF by default
@@ -34,14 +33,12 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 	} else if (num_nodes == 2) {  // Case: no right side
 
 		Node* root = new Node(pts[1]);
-		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		root->setType(INITIAL_CUT);
 		root->setRoot(true);
 		setRoot(root);
 
 		Node* left = new Node(pts[0]); // type set to LEAF by default
-		left->setNumPoints(num_nodes - 1);
 		left->setDepth(getHeight() + 1);
 		root->setLeft(left);
 
@@ -54,7 +51,6 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 
 		Node* root = new Node(points[median]); 
 		root->setType(INITIAL_CUT);
-		root->setNumPoints(num_nodes);
 		root->setDepth(getHeight());
 		root->setRoot(true);
 		setRoot(root);
@@ -100,6 +96,11 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 
 	}
 
+	// Clear pts for a clean start
+	// Traverse tree and save the points in level order
+	pts.clear();
+	levelOrderPts(); 
+
 }
 
 
@@ -129,11 +130,6 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 	int num = points_by_x.size();
 	int median = num / 2;
 
-	if (DEBUG) {
-		printf("num is %d\n", num);
-		printf("median is %d\n", median);
-	}
-
 	// BASE CASE: if only one point, return leaf containing point
 	// If the height of the tree is ODD at the new node, then the cut type is VERTICAL
 	// ie, at the root the height is 1 and the initial cut is VERTICAL
@@ -143,7 +139,6 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		if (DEBUG) printf("LEAF at depth %d\n", depth);
 		assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
 		Node* node = new Node(points_by_x[0]); // default type is LEAF
-		node->setNumPoints(num);
 		node->setDepth(depth);
 		node->setLeft(NULL); // redundant but here for sanity checks
 		node->setRight(NULL);
@@ -158,7 +153,6 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		// create new node and add median point to the tree
 		Node* node = new Node(points_by_x[median]);
 		node->setType(VERTICAL);
-		node->setNumPoints(median);
 		node->setDepth(depth);
 
 		// cut type is vertical, so split x-array into two parts and
@@ -193,7 +187,6 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		// add node to the tree
 		Node* node = new Node(points_by_y[median]);
 		node->setType(HORIZONTAL);
-		node->setNumPoints(median);
 		node->setDepth(depth);
 
 		// cut type is horizontal, so split y-array into two parts and
@@ -253,6 +246,37 @@ int KD_Tree::computeHeight() {
 }
 
 
+/* LEVEL ORDER POINTS
+	adds all nodes in KD-Tree to the pts vector using a simple
+	breadth first traversal
+Iterates through the "levels" of the tree – calls addLevel to traverse
+tree to find appropriate nodes.
+*/
+void KD_Tree::levelOrderPts() {
+	for (int depth = 1; depth < height + 1; depth++) {
+		addLevel(getRoot(), depth);
+	}
+}
+
+/* ADD LEVEL adds all nodes at depth x to the vector, from left->right
+	called by levelOrderPts()
+BASE CASES: node is NULL (parent only has one child node, or invalid input);
+	node is at desired depth, so add to the vector and exit
+RECURSIVE CALLS: traverse subtrees and print all nodes of desired depth
+*/
+void KD_Tree::addLevel(Node* node, int depth) {
+	if (!node) {
+		return;
+	}
+	if (node->getDepth() == depth) {
+		level_ordered_pts.push_back(node);
+		return;
+	}
+	addLevel(node->getLeft(), depth);
+	addLevel(node->getRight(), depth);
+}
+
+
 
 
 // PRINT FUNCTIONS
@@ -272,7 +296,11 @@ void KD_Tree::printTree() {
 	if(!getRoot()) {
 		printf("Root is NULL; tree is empty.\n");
 	}
-
+	printf("\nPRINTING TREE:\n");
+	for (int i = 0; i < level_ordered_pts.size(); i++) {
+		level_ordered_pts[i]->printInfo(); printf("\n");
+	}
+	fflush(stdout);
 }
 
 void KD_Tree::printNumNodes() {

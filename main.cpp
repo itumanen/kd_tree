@@ -42,6 +42,9 @@ int main(int argc, char** argv) {
 	KD_Tree* tree = new KD_Tree(points);
 	tree->printInfo();
 
+
+	if (DEBUG) tree->printTree();
+
 	return (EXIT_SUCCESS);
 
 }

@@ -29,6 +29,12 @@ typedef struct _segment2d {
 	int type; 
 } segment2D;
 
+
+typedef struct _rect2d {
+	double xmin, xmax, ymin, ymax;
+} rect2D;
+
+
 void printPoint(point2D p);
 void printSegment(segment2D s);
 bool equals(point2D a, point2D b);

@@ -28,10 +28,12 @@ int n;
 vector<point2D> points; 
 vector<Node*> points_by_level;
 
-bool DEBUG_MAIN = true;
-
 KD_Tree* tree;
 vector<KD_Tree*> trees;
+vector<rect2D> leaves;
+vector<segment2D> cuts;
+
+bool DEBUG_MAIN = true;
 
 
 /* PREDEFINED COLORS */
@@ -50,7 +52,6 @@ GLfloat cyan[3] = {0.0, 1.0, 1.0};
 
 
 /* FORWARD DECLARATIONS OF FUNCTIONS */
-void deallocate_tree(KD_Tree* tree);
 void print_points();
 
 // Test cases
@@ -148,11 +149,6 @@ int main(int argc, char** argv) {
 
 
 
-void deallocate_tree(KD_Tree* tree) {
-	tree->~KD_Tree();
-}
-
-
 // PRINT FUNCTIONS
 void print_points() {
 	printf("POINTS VECTOR\n");
@@ -234,24 +230,28 @@ void initialize_points_circle() {
 	}
 }
 
-//initializes the points in a x shape
+// initializes the points in a x shape - Bella
+// modified, based on test case on piazza and 
+// initialize_points_diagonal()
 void initializePointsX() {
 
 	points.clear();
 
-	for(int i = 0; i < n; ++i) {
-		point2D newPoint;
-		newPoint.x = -1 + (2 * (double)rand() / (double)RAND_MAX);
-		newPoint.y = newPoint.x;
-		points.push_back(newPoint);
+	point2D point1, point2;
+	for(int i = 0; i < n / 2; ++i) {
+
+		double x = i * (WINDOWSIZE / n * 2);
+
+		point1.x = x;
+		point1.y = x;
+
+		point2.x = x;
+		point2.y = WINDOWSIZE - x;
+
+		points.push_back(point1);
+		points.push_back(point2);
 	}
 
-	for(int i = 0; i < n; ++i) {
-		point2D newPoint;
-		newPoint.x = -1 + (2 * (double)rand() / (double)RAND_MAX);
-		newPoint.y = -1 * newPoint.x;
-		points.push_back(newPoint);
-	}
 	return;
 }
 
@@ -261,12 +261,6 @@ void initializePointsX() {
 void initialize_points() {
 
 	init_case = (init_case+1) % NB_TEST_CASES;
-
-	if (DEBUG_MAIN) {
-		printf("\ninit case is %d\n", init_case); 
-	  	printf("size of trees vect %lu\n", trees.size()); fflush(stdout);
-		fflush(stdout);
-	}
 
 	  switch (init_case)  {
 	      

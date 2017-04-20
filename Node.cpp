@@ -29,7 +29,9 @@ Node::Node(point2D point) {
 void Node::printInfo() {
 	printPoint(getPoint());
 	printType();
-	printf("Depth: %d\n", getDepth());
+	if (!isRoot()) {
+		printf("Depth: %d\n", getDepth());
+	}
 	fflush(stdout);
 }
 
@@ -48,6 +50,5 @@ void Node::printType() {
  
 
 Node::~Node() {
-	delete(left);
-	delete(right);
+
 }

@@ -22,7 +22,6 @@ public:
 	void levelOrderPts();
 	void addLevel(Node* node, int depth);
 	void deallocate_tree(Node* node);
-	void delete_levelOrderNodes();
 	
 	// INLINE HELPER FUNCTIONS
 	bool ptsIsEven() { return (num_nodes % 2 == 0); }
@@ -43,6 +42,11 @@ public:
 	void initializeHeight() { this->height = 1; }
 	void setNumNodes(int num) { this->num_nodes = num; }
 	void setPts(vector<point2D> points) { this->pts = points; }
+
+	// GRPAHICS - vectors are public for simplicity
+	void colorize(rect2D region, Node* node);
+	vector<segment2D> cuts;
+	vector<rect2D> leaves;
 
 private:
 	Node* root;

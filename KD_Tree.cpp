@@ -34,12 +34,11 @@ void KD_Tree::rebuildTree(vector<point2D> points) {
 	// check that input is valid / the number of points is strictly positive
 	assert(points.size() > 0);
 
-	// if valid number of points, reset attributes of tree
+	// if valid number of points, clear vectors and deallocate tree
 	pts.clear();
-	// delete_levelOrderNodes();
 	level_ordered_pts.clear();
-	// deallocate_tree(getRoot());
-	// delete(getRoot());
+	deallocate_tree(getRoot());
+	setRoot(NULL);
 
 	// build tree again, same as constructor
 	sort(points.begin(), points.end(), sortByX); // sort input vector by x-coords
@@ -308,7 +307,6 @@ void KD_Tree::addLevel(Node* node, int depth) {
 
 
 
-
 // PRINT FUNCTIONS
 
 void KD_Tree::printInfo() {
@@ -345,20 +343,14 @@ Recurses through entire tree and call Node destructor to deallocate
 */
 void KD_Tree::deallocate_tree(Node* node) {
 
-	if (node->isLeaf()) {
+	if (node->isLeaf() || !node) {
 		return;
 	}
 	
 	deallocate_tree(node->getLeft());
 	deallocate_tree(node->getRight());
-	node->~Node();
+	delete(node);
 
-}
-
-void KD_Tree::delete_levelOrderNodes() {
-	for (int i = 0; i < level_ordered_pts.size(); i++) {
-		level_ordered_pts[i]->~Node();
-	}
 }
 
 
@@ -369,5 +361,4 @@ then delete root
 */
 KD_Tree::~KD_Tree() {
 	deallocate_tree(getRoot());
-	delete(getRoot());
 }

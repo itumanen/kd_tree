@@ -23,6 +23,37 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 	setNumNodes(points.size()); 
 	initializeHeight();
 
+	initialize(points);
+
+}
+
+
+
+void KD_Tree::rebuildTree(vector<point2D> points) {
+
+	// check that input is valid / the number of points is strictly positive
+	assert(points.size() > 0);
+
+	// if valid number of points, reset attributes of tree
+	pts.clear();
+	// delete_levelOrderNodes();
+	level_ordered_pts.clear();
+	// deallocate_tree(getRoot());
+	// delete(getRoot());
+
+	// build tree again, same as constructor
+	sort(points.begin(), points.end(), sortByX); // sort input vector by x-coords
+	setPts(points); // save points as initialized to class
+	setNumNodes(points.size()); 
+	initializeHeight();
+
+	initialize(points);
+
+}
+
+
+void KD_Tree::initialize(vector<point2D> points) {
+
 	if (num_nodes == 1) {
 
 		Node* root = new Node(pts[0]);
@@ -105,7 +136,6 @@ KD_Tree::KD_Tree(vector<point2D> points) {
 
 
 
-// HELPER FUNCTIONS
 /*
 Recursively builds KD tree; takes vectors of points sorted by x/y and the current depth (height)
 of the tree and returns a pointer to a node, which is stored as the left or the right node of the parent.
@@ -323,6 +353,12 @@ void KD_Tree::deallocate_tree(Node* node) {
 	deallocate_tree(node->getRight());
 	node->~Node();
 
+}
+
+void KD_Tree::delete_levelOrderNodes() {
+	for (int i = 0; i < level_ordered_pts.size(); i++) {
+		level_ordered_pts[i]->~Node();
+	}
 }
 
 

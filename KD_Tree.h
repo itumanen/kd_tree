@@ -15,11 +15,14 @@ public:
 	~KD_Tree();
 
 	// HELPER FUNCTIONS
+	void initialize(vector<point2D> points); 
 	Node* build_kd_tree(vector<point2D> points_by_x, vector<point2D> points_by_y, int depth);
+	void rebuildTree(vector<point2D> points);
 	int computeHeight();
 	void levelOrderPts();
 	void addLevel(Node* node, int depth);
 	void deallocate_tree(Node* node);
+	void delete_levelOrderNodes();
 	
 	// INLINE HELPER FUNCTIONS
 	bool ptsIsEven() { return (num_nodes % 2 == 0); }

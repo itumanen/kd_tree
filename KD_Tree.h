@@ -33,6 +33,7 @@ public:
 	int getHeight() { return this->height; }
 	int getNumNodes() { return this->num_nodes; }
 	Node* getRoot() { return this->root; }
+	vector<Node*> getPoints() { return this->level_ordered_pts; }
 
 	void setRoot(Node* r) { this->root = r; }
 	void setHeight(int h) { this->height = h; }

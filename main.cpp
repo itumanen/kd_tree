@@ -34,6 +34,7 @@ vector<rect2D> leaves;
 vector<segment2D> cuts;
 
 bool DEBUG_MAIN = true;
+bool DEBUG_GRAPHICS = false;
 
 
 /* PREDEFINED COLORS */
@@ -47,7 +48,7 @@ GLfloat yellow[3] = {1.0, 1.0, 0.0};
 GLfloat magenta[3] = {1.0, 0.0, 1.0};
 GLfloat cyan[3] = {0.0, 1.0, 1.0};
 
-
+float transparency = 0.8;
 
 
 
@@ -108,11 +109,22 @@ int main(int argc, char** argv) {
 	tree = new KD_Tree(points);
 	tree->printInfo();
 	points_by_level = tree->getPoints();
+
+	// initialize graphics vectors
+	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	cuts = tree->cuts;
+	leaves = tree->leaves;
 	trees.push_back(tree);
 
 
 	if (DEBUG) {
 		tree->printTree();
+	}
+
+	if (DEBUG_GRAPHICS) {
+		tree->printTree();
+		printf("number of cuts: %lu\n", cuts.size());
+		printf("number of rectangles: %lu\n", leaves.size());
 	}
 
 	/* initialize GLUT  */
@@ -128,8 +140,9 @@ int main(int argc, char** argv) {
 	glutIdleFunc(timerfunc);  //<--------note we got an idle function, we'll use it to animate 
 
 	/* init GL */
-	/* set background color black*/
-	glClearColor(0, 0, 0, 0);   
+	/* set background color gray */
+	glClearColor(0.2, 0.2, 0.2, 0);   
+	// glClearColor(0, 0, 0, 0);   
 
 	
 	/* give control to event handler */
@@ -154,6 +167,13 @@ void print_points() {
 	printf("POINTS VECTOR\n");
 	for (int i = 0; i < points.size(); i++) {
 		printPoint(points[i]);
+	}
+}
+
+void printSegments() {
+	if (cuts.empty()) return;
+	for (int i = 0; i < cuts.size(); i++) {
+		printSegment(cuts[i]);
 	}
 }
 
@@ -300,7 +320,7 @@ void initialize_points() {
 void draw_points() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glColor3fv(cyan);
+	glColor3fv(black);
 	glPointSize(5);
 	glBegin(GL_POINTS);
 
@@ -312,6 +332,46 @@ void draw_points() {
 
 }
 
+
+void draw_segments() {
+
+	if (cuts.empty()) return;
+	glColor3fv(black);
+
+	for (int i = 0; i < cuts.size(); i++) {
+		glBegin(GL_LINES);
+		glLineWidth(15);
+		glVertex2d(cuts[i].start.x, cuts[i].start.y);
+		glVertex2d(cuts[i].end.x, cuts[i].end.y);
+		glEnd();
+	}
+
+}
+
+void draw_regions() {
+	if (leaves.empty()) return;
+
+	// glColor3fv(blue);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glColor4f(0.0, 1.0, 1.0, 0.2);
+
+	for (int i = 0; i < leaves.size(); i++) {
+		if (i % 4 == 0) {
+			glColor4f(0.0, 0.0, 1.0, transparency);
+		} else if (i % 3 == 0) {
+			glColor4f(0.3, 0.0, 1.0, transparency);
+		} else if (i % 2 == 0) {
+			glColor4f(0.0, 7.0, 1.0, transparency);
+		} else {
+			glColor4f(1.0, 1.0, 1.0, transparency);
+		}
+		glRectd(leaves[i].xmin, leaves[i].ymin, 
+				leaves[i].xmax, leaves[i].ymax);
+	}
+
+}
 
 
 
@@ -341,11 +401,9 @@ void display(void) {
 
 
 	  //draw my scene in the local coordinate system (0,0) to (WINSIZE,WINSIZE)
+	  draw_regions();
+	  draw_segments();
 	  draw_points();
-	  // draw_active_structure(); 
-	  // draw_intersection_points(); 
-	  // draw_sweep_line(); 
-	  // animate_points();
 
 	  /* execute the drawing commands */
 	  glFlush();
@@ -364,6 +422,8 @@ void keypress(unsigned char key, int x, int y) {
 	  case 'i': 
 
 	    points_by_level.clear();
+	    cuts.clear();
+	    leaves.clear();
 	    initialize_points(); 
 
 	    // build new tree for new test case, store the pointer in global vect
@@ -394,7 +454,17 @@ void keypress(unsigned char key, int x, int y) {
 	    break; 
 	  
 	  case 'c':
-	  	// colorize
+	  	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	  	cuts = tree->cuts;
+	  	leaves = tree->leaves;
+
+	  	if (DEBUG_GRAPHICS) {
+	  		printf("number of cuts: %lu\n", cuts.size());
+	  		printf("number of rectangles: %lu\n", leaves.size());
+	  		tree->printTree();
+	  		printSegments();
+	  	}
+
 	  	break;
 
 	  }

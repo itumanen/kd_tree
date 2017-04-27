@@ -44,7 +44,7 @@ public:
 	void setPts(vector<point2D> points) { this->pts = points; }
 
 	// GRPAHICS - vectors are public for simplicity
-	void colorize(rect2D region, Node* node);
+	void colorize(double xmin, double xmax, double ymin, double ymax, Node* node);
 	vector<segment2D> cuts;
 	vector<rect2D> leaves;
 

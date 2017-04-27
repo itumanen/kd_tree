@@ -337,6 +337,57 @@ void KD_Tree::printNumNodes() {
 
 
 
+void KD_Tree::colorize(double xmin, double xmax, double ymin, double ymax, Node* node) {
+
+	// BASE CASES
+	// if(!node) {
+	// 	return;
+	// }
+
+	if (node->isLeaf() || !node) {
+
+		// save rectangle for coloring
+		rect2D region = { xmin, xmax, ymin, ymax };
+		leaves.push_back(region);
+		return;
+	}
+
+	point2D pt = node->getPoint();
+	double med_x = pt.x;
+	double med_y = pt.y;
+
+	if (node->getType() == VERTICAL) {
+		
+		// add vertical segment for rendering
+		segment2D cut;
+		
+		cut.start.x = med_x;	cut.start.y = ymin;
+		cut.end.x = med_x; 		cut.end.y = ymax;
+		cut.type = VERTICAL;
+		cuts.push_back(cut);
+
+		colorize(xmin, med_x, ymin, ymax, node->getLeft());
+		colorize(med_x, xmax, ymin, ymax, node->getRight());
+
+	} else if (node->getType() == HORIZONTAL) {
+		
+		// add horizontal segment for rendering
+		segment2D cut;
+
+		cut.start.x = xmin; 	cut.start.y = med_y;
+		cut.end.x = xmax; 		cut.end.y = med_y;
+		cut.type = HORIZONTAL;
+		cuts.push_back(cut);
+
+		colorize(xmin, xmax, ymin, med_y, node->getLeft());
+		colorize(xmin, xmax, med_y, ymax, node->getRight());
+
+	}
+
+}
+
+
+
 /* Helper function for the destructor
 Recurses through entire tree and call Node destructor to deallocate 
 (delete) every node in the tree. 

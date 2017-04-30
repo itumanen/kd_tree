@@ -33,8 +33,10 @@ vector<KD_Tree*> trees;
 vector<rect2D> leaves;
 vector<segment2D> cuts;
 
+bool mondrian = true;
+
 bool DEBUG_MAIN = true;
-bool DEBUG_GRAPHICS = false;
+bool DEBUG_GRAPHICS = true;
 
 
 /* PREDEFINED COLORS */
@@ -54,6 +56,7 @@ float transparency = 0.8;
 
 /* FORWARD DECLARATIONS OF FUNCTIONS */
 void print_points();
+void printSegments();
 
 // Test cases
 void initialize_points();
@@ -121,11 +124,12 @@ int main(int argc, char** argv) {
 		tree->printTree();
 	}
 
-	if (DEBUG_GRAPHICS) {
-		tree->printTree();
-		printf("number of cuts: %lu\n", cuts.size());
-		printf("number of rectangles: %lu\n", leaves.size());
-	}
+	// if (DEBUG_GRAPHICS) {
+	// 	tree->printTree();
+	// 	printf("number of cuts: %lu\n", cuts.size());
+	// 	printf("number of rectangles: %lu\n", leaves.size());
+	// 	printSegments();
+	// }
 
 	/* initialize GLUT  */
 	glutInit(&argc, argv);
@@ -340,7 +344,7 @@ void draw_segments() {
 
 	for (int i = 0; i < cuts.size(); i++) {
 		glBegin(GL_LINES);
-		glLineWidth(15);
+		glLineWidth(20);
 		glVertex2d(cuts[i].start.x, cuts[i].start.y);
 		glVertex2d(cuts[i].end.x, cuts[i].end.y);
 		glEnd();
@@ -351,11 +355,31 @@ void draw_segments() {
 void draw_regions() {
 	if (leaves.empty()) return;
 
-	// glColor3fv(blue);
+	// make the tree look like a mondrian painting!
+	if (mondrian) {
+
+		for (int i = 0; i < leaves.size(); i++) {
+			if (i % 4 == 0) {
+				glColor3fv(blue);
+			} else if (i % 3 == 0) {
+				glColor3fv(red);
+			} else if (i % 2 == 0) {
+				glColor3fv(yellow);
+			} else {
+				glColor3fv(white);
+			}
+			glRectd(leaves[i].xmin, leaves[i].ymin, 
+					leaves[i].xmax, leaves[i].ymax);
+		}
+
+		return;
+
+	}
+
+	// bella's coloring
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// glColor4f(0.0, 1.0, 1.0, 0.2);
 
 	for (int i = 0; i < leaves.size(); i++) {
 		if (i % 4 == 0) {
@@ -422,8 +446,8 @@ void keypress(unsigned char key, int x, int y) {
 	  case 'i': 
 
 	    points_by_level.clear();
-	    cuts.clear();
-	    leaves.clear();
+	    // cuts.clear();
+	    // leaves.clear();
 	    initialize_points(); 
 
 	    // build new tree for new test case, store the pointer in global vect
@@ -450,22 +474,110 @@ void keypress(unsigned char key, int x, int y) {
 
 	    // switch tree to be rendered
 	    tree = trees[init_case];
+
+	    tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	    cuts = tree->cuts;
+	    leaves = tree->leaves;
+
+	    if (DEBUG_GRAPHICS) {
+	    	tree->printTree();
+	    	printf("number of cuts: %lu\n", cuts.size());
+	    	printf("number of rectangles: %lu\n", leaves.size());
+	    	printSegments();
+	    }
+	    
 	    glutPostRedisplay();
 	    break; 
 	  
 	  case 'c':
+
 	  	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
 	  	cuts = tree->cuts;
 	  	leaves = tree->leaves;
 
-	  	if (DEBUG_GRAPHICS) {
-	  		printf("number of cuts: %lu\n", cuts.size());
-	  		printf("number of rectangles: %lu\n", leaves.size());
-	  		tree->printTree();
-	  		printSegments();
-	  	}
-
+	  	glutPostRedisplay();
 	  	break;
+
+	  case '0':
+	  	init_case = NB_TEST_CASES;
+	  	initialize_points();
+
+	  	tree = trees[init_case];
+
+	  	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	  	cuts = tree->cuts;
+	  	leaves = tree->leaves;
+
+	  	glutPostRedisplay();
+	  	break;
+
+	 case '1':
+
+	 	if (trees.size() <= 1) {
+	 		break;
+	 	}
+
+	 	init_case = 0;
+	 	initialize_points();
+	 	tree = trees[init_case];
+
+	 	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	 	cuts = tree->cuts;
+	 	leaves = tree->leaves;
+	 	
+	 	glutPostRedisplay();
+	 	break;
+
+	 case '2':
+
+	 	if (trees.size() <= 2) {
+	 		break;
+	 	}
+
+	 	init_case = 1;
+	 	initialize_points();
+	 	tree = trees[init_case];
+
+	 	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	 	cuts = tree->cuts;
+	 	leaves = tree->leaves;
+	 	
+	 	glutPostRedisplay();
+	 	break;
+
+	 case '3':
+
+	 	if (trees.size() <= 3) {
+	 		break;
+	 	}
+
+	 	init_case = 2;
+	 	initialize_points();
+	 	tree = trees[init_case];
+
+	 	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	 	cuts = tree->cuts;
+	 	leaves = tree->leaves;
+	 	
+	 	glutPostRedisplay();
+	 	break;
+
+	 case '4':
+
+	 	if (trees.size() <= 4) {
+	 		break;
+	 	}
+
+	 	init_case = 3;
+	 	initialize_points();
+	 	tree = trees[init_case];
+
+	 	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
+	 	cuts = tree->cuts;
+	 	leaves = tree->leaves;
+	 	
+	 	glutPostRedisplay();
+	 	break;
 
 	  }
 

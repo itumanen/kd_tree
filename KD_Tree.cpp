@@ -40,6 +40,9 @@ void KD_Tree::rebuildTree(vector<point2D> points) {
 	deallocate_tree(getRoot());
 	setRoot(NULL);
 
+	this->cuts.clear();
+	this->leaves.clear();
+
 	// build tree again, same as constructor
 	sort(points.begin(), points.end(), sortByX); // sort input vector by x-coords
 	setPts(points); // save points as initialized to class
@@ -175,7 +178,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		setHeight(depth);
 		return node;
 
-	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this node
+	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this new node, cut type is VERTICAL
 
 		// if (DEBUG) printf("VERTICAL at depth%d\n", depth);
 
@@ -185,7 +188,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		node->setDepth(depth);
 
 		// cut type is vertical, so split x-array into two parts and
-		// sort the parts by y-coordinate
+		// sort the parts by y-coordinate -- next cut is horizontal
 		vector<point2D> x_left, x_right, y_left, y_right;
 
 		// COPY DATA
@@ -204,7 +207,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 
 		// recursive calls
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
-		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
+		node->setRight(build_kd_tree(x_right, y_right, depth + 1));
 
 		setHeight(depth);
 		return node;
@@ -234,13 +237,14 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 			y_right.push_back(points_by_y[i]);
 		}
 
+
 		// SORT BY X-COORDINATE
 		sort(x_left.begin(), x_left.end(), sortByX);
 		sort(x_right.begin(), x_right.end(), sortByX);
 
 		// recursive call
 		node->setLeft(build_kd_tree(x_left, y_left, depth + 1));
-		node->setRight(build_kd_tree(x_right, x_right, depth + 1));
+		node->setRight(build_kd_tree(x_right, y_right, depth + 1));
 
 		setHeight(depth);
 		return node;
@@ -339,16 +343,13 @@ void KD_Tree::printNumNodes() {
 
 void KD_Tree::colorize(double xmin, double xmax, double ymin, double ymax, Node* node) {
 
-	// BASE CASES
-	// if(!node) {
-	// 	return;
-	// }
-
+	// BASE CASE - make rectangle and return
 	if (node->isLeaf() || !node) {
 
 		// save rectangle for coloring
 		rect2D region = { xmin, xmax, ymin, ymax };
 		leaves.push_back(region);
+		
 		return;
 	}
 

@@ -48,6 +48,7 @@ public:
 	vector<segment2D> cuts;
 	vector<rect2D> leaves;
 
+
 private:
 	Node* root;
 	int height;

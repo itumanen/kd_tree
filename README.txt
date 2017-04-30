@@ -7,24 +7,41 @@ Laura Toma, Bowdoin College
 
 USAGE: ./kdtree <nb_of_points>
 
+KEYPRESS:
+q: quit
+i: iterate through test cases and render them in window
+c: colorize tree
+
+
 PART I: BUILD KD TREE
 - TODO: 
 	* add rtimer code to makefile + use to compute the run time of KD tree construction
-	* To use less space, declare enum using chars instead of ints
-	* Error messages for assert?  -- less important
-	* MAIN FILE!!! look at previous projects
-	* PRINT TREE METHOD
-	* resize/shrink to fit or declare size of vector for space optimization
-- Known Bugs (and "bugs"):
-	* setting height during recursive calls originally yielded incorrect results – this isn't a real bug anymore, but
-	  the extra computeHeight() is still called at the end of constructor as a sanity check even though it's redundant
 
 
 PART II: VISUALIZE TREE LIKE A MONDRIAN PAINTING
-- 
+- KD Tree is initialized with random points
 
 
-DATA STRUCTURES
+CLASSES
+- Node - stores metatdata for each node in the tree (ex: node is root or leaf, corresponding cut type) and pointers to left and right children, if any.
+- KD_Tree
+	* stores root of the tree, vector of points initialized in main()
+	* tree is built recursively 
+	* maintains a vector of Node* in level order - for printing the tree
+	* colorize() traverses the tree recursively; for every node in the tree that has at least one child, exactly one segment is created and stored for rendering. If the node is a leaf or one of its children is NULL (eg, no right node), a rectangle is stored and the recursion returns.
+
+
+DATA STRUCTURES / GLOBAL VARS
+- point2D: stores doubles x and y
+- segment2D: stores start and end points, point2D objects
+- rectangle2D: stores coordinates of upper left and lower right vertices, all doubles. 
+- vector<point2D> points: initialized with test cases. Each tree stores this vector so that the tree can be rendered again.
+- KD_Tree* tree: Pointer to a KD Tree object - the 'current' tree that has been rendered
+- vector<KD_Tree*> trees: Each test case is a different object; the pointer to this object is stored in a global vector. Iterating through the test cases updates the current tree pointer to something in this vector. In the case of random point initialization, where the points are different at every iteration, the 'random' tree is deallocated and then recomputed according to the new vector of points.
+- vector<segment2D> cuts: set when tree->colorize() is called. Stores all the segments that divide the plane.
+- vector<rect2D> leaves: set when tree->colorize() is called. Stores each region of the tree that has to be colorized.
+
 
 VARIABLES/DEFINES
+- cutType - horizontal, vertical, leaf, initial (set to vertical, but can be swapped)
 - DEBUG, boolean defined in geom.h that only executes certain statements (e.g. prints) for debugging

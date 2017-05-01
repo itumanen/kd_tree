@@ -26,17 +26,13 @@ const int NB_TEST_CASES = 5;
 
 int n;
 vector<point2D> points; 
-vector<Node*> points_by_level;
 
 KD_Tree* tree;
 vector<KD_Tree*> trees;
 vector<rect2D> leaves;
 vector<segment2D> cuts;
 
-bool mondrian = true;
-
-bool DEBUG_MAIN = true;
-bool DEBUG_GRAPHICS = true;
+bool mondrian = true; // flip for bella's coloring instead
 
 
 /* PREDEFINED COLORS */
@@ -98,20 +94,16 @@ int main(int argc, char** argv) {
 		tree = new KD_Tree();
 		tree->printTree();
 		printf("Exiting.\n");
-		return (EXIT_SUCCESS); // todo see if something else should be done
+		return (EXIT_SUCCESS); 
 	}
 	
 	// DEFAULT: INITIALIZE POINTS AT RANDOM
 	initialize_points_random();
 
-	if (DEBUG) {
-		print_points();
-	}
 
 	// BUILD KD TREE
 	tree = new KD_Tree(points);
 	tree->printInfo();
-	points_by_level = tree->getPoints();
 
 	// initialize graphics vectors
 	tree->colorize(0, WINDOWSIZE, 0, WINDOWSIZE, tree->getRoot());
@@ -119,17 +111,6 @@ int main(int argc, char** argv) {
 	leaves = tree->leaves;
 	trees.push_back(tree);
 
-
-	if (DEBUG) {
-		tree->printTree();
-	}
-
-	// if (DEBUG_GRAPHICS) {
-	// 	tree->printTree();
-	// 	printf("number of cuts: %lu\n", cuts.size());
-	// 	printf("number of rectangles: %lu\n", leaves.size());
-	// 	printSegments();
-	// }
 
 	/* initialize GLUT  */
 	glutInit(&argc, argv);
@@ -146,7 +127,6 @@ int main(int argc, char** argv) {
 	/* init GL */
 	/* set background color gray */
 	glClearColor(0.2, 0.2, 0.2, 0);   
-	// glClearColor(0, 0, 0, 0);   
 
 	
 	/* give control to event handler */
@@ -445,20 +425,13 @@ void keypress(unsigned char key, int x, int y) {
 	  
 	  case 'i': 
 
-	    points_by_level.clear();
-	    // cuts.clear();
-	    // leaves.clear();
 	    initialize_points(); 
 
 	    // build new tree for new test case, store the pointer in global vect
 	    if (init_case + 1 > trees.size()) {
-	    	if (DEBUG_MAIN) {
-	    		printf("number of points %lu\n", points.size());
-	    	}
 	    	
 	    	KD_Tree* newTree = new KD_Tree(points);	
 	    	newTree->printInfo();
-	    	points_by_level = newTree->getPoints();
 	    	trees.push_back(newTree);
 
 	    } 	else if (init_case == 0 && trees.size() > 0) {
@@ -467,7 +440,6 @@ void keypress(unsigned char key, int x, int y) {
 	    	// need to rebuild tree with new set of random
 	    	// points
 	    	trees[0]->rebuildTree(points);
-	    	points_by_level = trees[0]->getPoints();
 	    	trees[0]->printInfo();
 
 	    }
@@ -479,13 +451,6 @@ void keypress(unsigned char key, int x, int y) {
 	    cuts = tree->cuts;
 	    leaves = tree->leaves;
 
-	    if (DEBUG_GRAPHICS) {
-	    	tree->printTree();
-	    	printf("number of cuts: %lu\n", cuts.size());
-	    	printf("number of rectangles: %lu\n", leaves.size());
-	    	printSegments();
-	    }
-	    
 	    glutPostRedisplay();
 	    break; 
 	  

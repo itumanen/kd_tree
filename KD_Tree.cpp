@@ -45,7 +45,7 @@ void KD_Tree::rebuildTree(vector<point2D> points) {
 
 	// build tree again, same as constructor
 	sort(points.begin(), points.end(), sortByX); // sort input vector by x-coords
-	setPts(points); // save points as initialized to class
+	setPts(points);  // save points as initialized to class
 	setNumNodes(points.size()); 
 	initializeHeight();
 
@@ -115,10 +115,6 @@ void KD_Tree::initialize(vector<point2D> points) {
 		sort(y_right.begin(), y_right.end(), sortByY);
 
 		// BUILD TREE RECURSIVELY
-		if (DEBUG) {
-			printf("RECURSIVE CALL\n"); fflush(stdout);
-		}
-
 		// use the depth of the root (height of the tree at root node) for
 		// recursive call because the height is updated during the call
 		root->setLeft(build_kd_tree(x_left, y_left, root->getDepth() + 1 ));
@@ -168,8 +164,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 	// Thus if the height is even then the cut type is HORIZONTAL
 	if (num == 1) {
 
-		if (DEBUG) printf("LEAF at depth %d\n", depth);
-		assert(equals(points_by_x[0], points_by_y[0])); // TODO IF THIS FAILS DEBUG!! --> print statement
+		assert(equals(points_by_x[0], points_by_y[0])); 
 		Node* node = new Node(points_by_x[0]); // default type is LEAF
 		node->setDepth(depth);
 		node->setLeft(NULL); // redundant but here for sanity checks
@@ -178,9 +173,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		setHeight(depth);
 		return node;
 
-	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at this new node, cut type is VERTICAL
-
-		// if (DEBUG) printf("VERTICAL at depth%d\n", depth);
+	} else if (depth % 2 != 0 && num > 1) {   // height of tree is odd at new node, cut type VERTICAL
 
 		// create new node and add median point to the tree
 		Node* node = new Node(points_by_x[median]);
@@ -212,9 +205,7 @@ Node* KD_Tree::build_kd_tree(vector<point2D> points_by_x, vector<point2D> points
 		setHeight(depth);
 		return node;
 
-	} else if (depth % 2 == 0 && num > 1) {   // depth is even and num > 1
-
-		// if (DEBUG) printf("HORIZONTAL at depth%d\n", depth);
+	} else if (depth % 2 == 0 && num > 1) {   // depth is even and num > 1, cut is HORIZONTAL
 
 		// add node to the tree
 		Node* node = new Node(points_by_y[median]);
@@ -291,6 +282,7 @@ void KD_Tree::levelOrderPts() {
 	}
 }
 
+
 /* ADD LEVEL adds all nodes at depth x to the vector, from left->right
 	called by levelOrderPts()
 BASE CASES: node is NULL (parent only has one child node, or invalid input);
@@ -340,7 +332,14 @@ void KD_Tree::printNumNodes() {
 }
 
 
-
+/*  COLORIZE KD TREE
+Traverses tree recursively, computes the segments that cut the plane into subplanes and 
+saves the rectangles (leaves and right children of nodes with only one child) to be rendered
+by OpenGL.
+Takes minimum and maximum (x,y) coordinates for the rectangle of the region that the points sit
+in. node contains the point of the median that cuts the plane into subplanes; its x- and y-values 
+are used to update the min/max values that are passed into the next recursive level.
+*/
 void KD_Tree::colorize(double xmin, double xmax, double ymin, double ymax, Node* node) {
 
 	// BASE CASE - make rectangle and return
@@ -353,6 +352,7 @@ void KD_Tree::colorize(double xmin, double xmax, double ymin, double ymax, Node*
 		return;
 	}
 
+	// for brevity
 	point2D pt = node->getPoint();
 	double med_x = pt.x;
 	double med_y = pt.y;

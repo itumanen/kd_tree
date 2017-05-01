@@ -5,21 +5,13 @@ Implementation of a 2-dimensional KD-Tree in C++
 Computational Geometry, Spring 2017
 Laura Toma, Bowdoin College
 
+
+
 USAGE: ./kdtree <nb_of_points>
 
 KEYPRESS:
 q: quit
 i: iterate through test cases and render them in window
-c: colorize tree
-
-
-PART I: BUILD KD TREE
-- TODO: 
-	* add rtimer code to makefile + use to compute the run time of KD tree construction
-
-
-PART II: VISUALIZE TREE LIKE A MONDRIAN PAINTING
-- KD Tree is initialized with random points
 
 
 CLASSES

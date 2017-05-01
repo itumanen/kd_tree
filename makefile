@@ -45,8 +45,6 @@ node.o: Node.cpp Node.h geom.h
 geom.o: geom.cpp geom.h 
 	$(CC) -c $(INCLUDEPATH) $(CFLAGS) geom.cpp -o $@
 
-# rtimer.o: rtimer.h rtimer.c
-# 	$(CC) -c $(INCLUDEPATH) $(CFLAGS) rtimer.c -o $@
 
 clean::
 	rm *.o
